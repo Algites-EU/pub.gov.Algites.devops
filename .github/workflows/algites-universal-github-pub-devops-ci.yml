@@ -1,0 +1,573 @@
+name: Algites Universal Public Devops CI 
+
+on:
+  workflow_call:
+    inputs:
+      # Build tool selection:
+      # - auto   : resolve from algites-build.properties (if present) otherwise optimized auto-selection
+      # - gradle : force Gradle
+      # - maven  : force Maven
+      build-tool:
+        description: "auto | gradle | maven"
+        required: false
+        type: string
+        default: "auto"
+
+      # Optional: override Java version. If empty, it will be auto-detected.
+      java-version:
+        description: "Java version (e.g. 17, 21). If empty, auto-detect."
+        required: false
+        type: string
+        default: ""
+
+      # Optional: override Gradle tasks
+      gradle-publish-task:
+        description: "Gradle task to publish"
+        required: false
+        type: string
+        default: "publish"
+      gradle-test-task:
+        description: "Gradle task to run tests only"
+        required: false
+        type: string
+        default: "check"
+      gradle-compile-task:
+        description: "Gradle task to compile only (no tests)"
+        required: false
+        type: string
+        default: "classes"
+
+      # Optional: override Maven goals/phases
+      maven-publish-goal:
+        description: "Maven goal/phase to publish"
+        required: false
+        type: string
+        default: "deploy"
+      maven-test-goal:
+        description: "Maven goal/phase to run tests only"
+        required: false
+        type: string
+        default: "verify"
+      maven-compile-goal:
+        description: "Maven goal/phase to compile only (no tests)"
+        required: false
+        type: string
+        default: "compile"
+
+    secrets:
+      GITHUB_APP_ID:
+        required: false
+      GITHUB_APP_INSTALLATION_ID:
+        required: false
+      GITHUB_APP_PEM:
+        required: false
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Decide mode by branch
+        id: mode
+        shell: bash
+        run: |
+          REF="${GITHUB_REF#refs/heads/}"
+          echo "Branch: $REF"
+
+          # 1) Feature test runs: compile only (no tests, no publish/deploy/install)
+          if [[ "$REF" == *"/feature-testrun/"* || "$REF" == feature-testrun/* ]]; then
+            echo "mode=verify" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 2) Feature branches: compile only (no tests, no publish/deploy/install)
+          if [[ "$REF" == *"/feature/"* || "$REF" == feature/* ]]; then
+            echo "mode=compile" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 3) Lane branches: verify (the lane rules are validated later)
+          if [[ "$REF" == *"/lane/"* || "$REF" == lane/* ]]; then
+            echo "mode=verify" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 4) Verify branches: main/master/develop/hotfix and also */main, */master, */develop, */hotfix
+          if [[ "$REF" == "main" || "$REF" == "master" || "$REF" == "develop" || "$REF" == "hotfix" || "$REF" == */main || "$REF" == */master || "$REF" == */develop || "$REF" == */hotfix ]]; then
+            echo "mode=verify" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 5) Everything else: skip
+          echo "mode=skip" >> "$GITHUB_OUTPUT"
+
+      - name: Lane consistency + B1 snapshot version (lane branches)
+        id: lanever
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BRANCH="${GITHUB_REF#refs/heads/}"
+
+          # Defaults (for non-lane branches)
+          {
+            echo "is_lane=false"
+            echo "lane="
+            echo "variant="
+            echo "snapshot_version="
+          } >> "$GITHUB_OUTPUT"
+
+          # Only apply B1 versioning to lane branches.
+          if [[ ! "$BRANCH" =~ (^|/)lane/([^/]+) ]]; then
+            exit 0
+          fi
+
+          BRANCH_LANE="${BASH_REMATCH[2]}"
+          echo "is_lane=true" >> "$GITHUB_OUTPUT"
+
+          # Determine variant as the first segment (must not be 'lane' itself).
+          PREFIX="${BRANCH%%/*}"
+          case "$PREFIX" in
+            lane|feature|feature-testrun|main|master|develop|hotfix)
+              echo "::error::Lane branches must be variant-prefixed, e.g. 'jvm17/lane/1.1.x' (got '$BRANCH')."
+              exit 1
+              ;;
+          esac
+          VARIANT="$PREFIX"
+          echo "variant=$VARIANT" >> "$GITHUB_OUTPUT"
+
+          if [[ ! -f "algites-repository.properties" ]]; then
+            echo "::error::algites-repository.properties not found in repo root (required for lane branches)."
+            exit 1
+          fi
+
+          REPO_LANE="$(grep -E '^[[:space:]]*repo\.lane[[:space:]]*=' algites-repository.properties | head -n1 | cut -d'=' -f2- | tr -d '[:space:] || true)"
+          if [[ -z "$REPO_LANE" ]]; then
+            echo "::error::repo.lane missing/empty in algites-repository.properties"
+            exit 1
+          fi
+
+          # Branch lane must match repo.lane
+          if [[ "$BRANCH_LANE" != "$REPO_LANE" ]]; then
+            echo "::error::Lane mismatch. Branch lane='$BRANCH_LANE' but repo.lane='$REPO_LANE'."
+            exit 1
+          fi
+
+          if [[ ! "$REPO_LANE" =~ ^([0-9]+)\.([0-9]+)\.x$ ]]; then
+            echo "::error::repo.lane must be <A>.<B>.x (e.g. 1.1.x). Got: '$REPO_LANE'."
+            exit 1
+          fi
+
+          A="${BASH_REMATCH[1]}"
+          B="${BASH_REMATCH[2]}"
+
+          echo "lane=$REPO_LANE" >> "$GITHUB_OUTPUT"
+
+          # Compute next C from tags: vA.B.C-VARIANT
+          PATTERN="v${A}.${B}.*-${VARIANT}"
+          MAX_C="-1"
+          while IFS= read -r tag; do
+          if [[ "$tag" =~ ^v${A}\.${B}\.([0-9]+)-${VARIANT}$ ]]; then
+            c="${BASH_REMATCH[1]}"
+            if (( c > MAX_C )); then MAX_C="$c"; fi
+          fi
+          done < <(git tag --list "$PATTERN" || true)
+
+          NEXT_C=$((MAX_C + 1))
+          if (( NEXT_C < 0 )); then NEXT_C=0; fi
+
+          SNAPSHOT_VERSION="${A}.${B}.${NEXT_C}-${VARIANT}-SNAPSHOT"
+          echo "snapshot_version=$SNAPSHOT_VERSION" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### B1 Version (lane branches)"
+            echo ""
+            echo "- Branch: \`${BRANCH}\`"
+            echo "- Variant: \`${VARIANT}\`"
+            echo "- Lane: \`${REPO_LANE}\`"
+            echo "- Computed Snapshot: \`${SNAPSHOT_VERSION}\`"
+            echo ""
+            echo "> Tags scanned: \`${PATTERN}\` (format: `vA.B.C-VARIANT`)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Detect config changes (pom/gradle)
+        id: changes
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          # For workflow_dispatch (or other events without a "before"), we cannot reliably diff.
+          if [[ "${{ github.event_name }}" != "push" ]]; then
+            echo "pom_changed=false" >> "$GITHUB_OUTPUT"
+            echo "gradle_changed=false" >> "$GITHUB_OUTPUT"
+            echo "note=non-push-event" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          # First push to a new branch may have BEFORE=0000...
+          if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]]; then
+            CHANGED="$(git show --name-only --pretty='' "$AFTER" || true)"
+          else
+            CHANGED="$(git diff --name-only "$BEFORE" "$AFTER" || true)"
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          pom_changed=false
+          gradle_changed=false
+
+          # POM change patterns
+          if echo "$CHANGED" | grep -Eq '(^|/)pom\.xml$|\.pom$'; then
+            pom_changed=true
+          fi
+
+          # Gradle config change patterns
+          if echo "$CHANGED" | grep -Eq '(^|/)build\.gradle(\.kts)?$|(^|/)settings\.gradle(\.kts)?$|(^|/)gradle\.properties$|(^|/)gradlew(\.bat)?$|(^|/)buildSrc/|(^|/)gradle/'; then
+            gradle_changed=true
+          fi
+
+          echo "pom_changed=$pom_changed"
+          echo "gradle_changed=$gradle_changed"
+
+          echo "pom_changed=$pom_changed" >> "$GITHUB_OUTPUT"
+          echo "gradle_changed=$gradle_changed" >> "$GITHUB_OUTPUT"
+
+      - name: Extract related GitHub Issues (from branch + commit messages)
+        id: issues
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REF="${GITHUB_REF#refs/heads/}"
+          ORG="Algites-EU"
+          REPO="${GITHUB_REPOSITORY}"
+
+          # Collect commit subjects (only subjects are used, not bodies)
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            BEFORE="${{ github.event.before }}"
+            AFTER="${{ github.sha }}"
+            if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]]; then
+              MSGS="$(git log -1 --format=%s "$AFTER" || true)"
+            else
+              MSGS="$(git log --format=%s "$BEFORE..$AFTER" || true)"
+            fi
+          else
+            MSGS="$(git log -1 --format=%s "${{ github.sha }}" || true)"
+          fi
+
+          export REF ORG REPO MSGS
+
+          python3 - <<'PY'
+          import os, re
+
+          ref = os.environ.get("REF","")
+          org = os.environ.get("ORG","Algites-EU")
+          repo = os.environ.get("REPO","")
+          msgs = os.environ.get("MSGS","")
+
+          # Branch conventions (recommended, strict):
+          #   .../feature/ID.123_some-text
+          #   .../feature/ID.pub.tool.Java-123_some-text
+          #
+          # Commit conventions (supported):
+          #   #123
+          #   #ID.123
+          #   #pub.tool.Java-123
+          #   #ID.pub.tool.Java-123
+          #
+          # Notes:
+          # - branch parsing is intentionally strict (requires "ID." + "_" delimiter)
+          # - cross-repo shorthand assumes the Algites-EU organization
+
+          refs = set()  # (repo_full, issue_number)
+
+          # --- Branch parsing (strict, forcing: "ID.<...>" followed by underscore) ---
+          for m in re.finditer(r'(?:^|/)ID\.(\d{1,9})_', ref):
+            refs.add((repo, m.group(1)))
+
+          for m in re.finditer(r'(?:^|/)ID\.([A-Za-z0-9.]+)-(\d{1,9})_', ref):
+            alias, num = m.group(1), m.group(2)
+            refs.add((f"{org}/{alias}", num))
+
+          # --- Commit parsing (#token) ---
+          for token in re.findall(r'#[A-Za-z0-9.\-]{1,120}', msgs):
+            t = token[1:]  # strip '#'
+            if t.startswith("ID."):
+              t = t[3:]
+
+            if re.fullmatch(r'\d{1,9}', t):
+              refs.add((repo, t))
+              continue
+
+            m = re.fullmatch(r'([A-Za-z0-9.]+)-(\d{1,9})', t)
+            if m:
+              alias, num = m.group(1), m.group(2)
+              refs.add((f"{org}/{alias}", num))
+
+          out_path = os.environ.get("GITHUB_OUTPUT")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+
+          if not refs:
+            if out_path:
+              with open(out_path, "a", encoding="utf-8") as f:
+                f.write("found=false\n")
+                f.write("issues=\n")
+            raise SystemExit(0)
+
+          refs_sorted = sorted(refs, key=lambda x: (x[0], int(x[1])))
+
+          if out_path:
+            with open(out_path, "a", encoding="utf-8") as f:
+              f.write("found=true\n")
+              f.write("issues=" + " ".join([f"{r}#{n}" for r,n in refs_sorted]) + "\n")
+
+          if summary_path:
+            with open(summary_path, "a", encoding="utf-8") as s:
+              s.write("## Related Issues\n\n")
+              for r, n in refs_sorted:
+                s.write(f"- [{r}#{n}](https://github.com/{r}/issues/{n})\n")
+              s.write("\n")
+              s.write("> Detected from branch name (e.g. `feature/ID.123_...`) and/or commit subjects containing `#123`, `#pub.tool.Java-123`, etc.\n")
+          PY
+
+      - name: Emit related-issue notices
+        if: ${{ steps.issues.outputs.found == 'true' }}
+        shell: bash
+        run: |
+          for item in ${{ steps.issues.outputs.issues }}; do
+            echo "::notice title=Related Issue::$item"
+          done
+
+      - name: Resolve build tool(s) (auto/gradle/maven)
+        id: tool
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          # Inputs
+          TOOL_INPUT="${{ inputs.build-tool }}"
+          if [[ -z "$TOOL_INPUT" ]]; then TOOL_INPUT="auto"; fi
+
+          # File override (optional)
+          TOOL_FILE=""
+          if [[ -f "algites-build.properties" ]]; then
+            v="$(grep -E '^[[:space:]]*build-tool[[:space:]]*=' algites-build.properties | head -n1 | sed -E 's/^[[:space:]]*build-tool[[:space:]]*=[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r\n')"
+            if [[ "$v" == "maven" || "$v" == "gradle" || "$v" == "auto" ]]; then
+              TOOL_FILE="$v"
+            fi
+          fi
+
+          # Precedence: input overrides file; file overrides optimized auto.
+          TOOL="$TOOL_INPUT"
+          if [[ "$TOOL" == "auto" && -n "$TOOL_FILE" ]]; then
+            TOOL="$TOOL_FILE"
+          fi
+
+          POM_CHANGED="${{ steps.changes.outputs.pom_changed }}"
+          GRADLE_CHANGED="${{ steps.changes.outputs.gradle_changed }}"
+
+          run_maven=false
+          run_gradle=false
+
+          # Forced single-tool modes
+          if [[ "$TOOL" == "maven" ]]; then
+            run_maven=true
+          elif [[ "$TOOL" == "gradle" ]]; then
+            run_gradle=true
+          else
+            # Optimized auto-selection:
+            # - if both changed -> run both
+            # - if pom changed -> run only maven
+            # - if gradle config changed -> run gradle
+            # - if neither changed -> run gradle
+            if [[ "$POM_CHANGED" == "true" && "$GRADLE_CHANGED" == "true" ]]; then
+              run_maven=true
+              run_gradle=true
+            elif [[ "$POM_CHANGED" == "true" ]]; then
+              run_maven=true
+            elif [[ "$GRADLE_CHANGED" == "true" ]]; then
+              run_gradle=true
+            else
+              run_gradle=true
+            fi
+          fi
+
+          # Sanity + fallback based on repo contents
+          if [[ "$run_gradle" == "true" && ! -f "./gradlew" ]]; then
+            if [[ "$run_maven" == "false" && -f "pom.xml" ]]; then
+              echo "Gradle selected but ./gradlew not found; falling back to Maven (pom.xml present)."
+              run_gradle=false
+              run_maven=true
+            else
+              echo "::error::Gradle selected but ./gradlew not found."
+              exit 1
+            fi
+          fi
+
+          if [[ "$run_maven" == "true" && ! -f "pom.xml" ]]; then
+            if [[ "$run_gradle" == "false" && -f "./gradlew" ]]; then
+              echo "Maven selected but pom.xml not found; falling back to Gradle (gradlew present)."
+              run_maven=false
+              run_gradle=true
+            else
+              echo "::error::Maven selected but pom.xml not found."
+              exit 1
+            fi
+          fi
+
+          echo "run_gradle=$run_gradle, run_maven=$run_maven"
+          echo "run_gradle=$run_gradle" >> "$GITHUB_OUTPUT"
+          echo "run_maven=$run_maven" >> "$GITHUB_OUTPUT"
+
+      - name: Detect Java version
+        id: detect-java
+        if: ${{ inputs.java-version == '' && steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          # Preferred: .java-version (one integer line)
+          if [ -f .java-version ]; then
+            v="$(tr -d '\r\n' < .java-version)"
+            if [[ "$v" =~ ^[0-9]+$ ]]; then
+              echo "version=$v" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          # Gradle: gradle.properties with javaVersion=17
+          if [ -f gradle.properties ] && grep -q '^javaVersion=' gradle.properties; then
+            v="$(grep '^javaVersion=' gradle.properties | head -n1 | cut -d= -f2 | tr -d ' \r\n')"
+            if [[ "$v" =~ ^[0-9]+$ ]]; then
+              echo "version=$v" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          # Maven: try to pick from root pom.xml (simple heuristics)
+          if [ -f pom.xml ]; then
+            v="$(grep -oE '<maven\.compiler\.release>[0-9]+'</maven\.compiler\.release>' pom.xml | head -n1 | grep -oE '[0-9]+' || true)"
+            if [[ "$v" =~ ^[0-9]+$ ]]; then
+              echo "version=$v" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            v="$(grep -oE '<maven\.compiler\.source>[0-9]+'</maven\.compiler\.source>' pom.xml | head -n1 | grep -oE '[0-9]+' || true)"
+            if [[ "$v" =~ ^[0-9]+$ ]]; then
+              echo "version=$v" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "version=17" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version != '' && inputs.java-version || steps.detect-java.outputs.version }}
+
+      - name: Generate GitHub App token
+        id: app-token
+        if: ${{ steps.mode.outputs.mode != 'skip' && (steps.tool.outputs.run_gradle == 'true' || steps.tool.outputs.run_maven == 'true') && secrets.GITHUB_APP_ID != '' && secrets.GITHUB_APP_PEM != '' && secrets.GITHUB_APP_INSTALLATION_ID != '' }}
+        uses: actions/github-app-token@v1
+        with:
+          app-id: ${{ secrets.GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITHUB_APP_PEM }}
+          installation-id: ${{ secrets.GITHUB_APP_INSTALLATION_ID }}
+
+      # -------------------------
+      # Compile-only mode
+      # -------------------------
+      - name: Gradle - compile only
+        if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'compile' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew || true
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
+          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
+
+      - name: Maven - compile only
+        if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'compile' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
+          mvn -B $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
+
+      # -------------------------
+      # Test-only mode
+      # -------------------------
+      - name: Gradle - tests only
+        if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'test' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew || true
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
+          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+
+      - name: Maven - tests only
+        if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'test' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
+          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+
+      # -------------------------
+      # Verify mode (no deployment)
+      # -------------------------
+      - name: Gradle - verify
+        if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'verify' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew || true
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
+          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+
+      - name: Maven - verify
+        if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+          EXTRA=""
+          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
+          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+
+
+      - name: Skip (non-matching branch)
+        if: ${{ steps.mode.outputs.mode == 'skip' }}
+        run: |
+          echo "Mode=skip → no compile/test/publish for this branch."
