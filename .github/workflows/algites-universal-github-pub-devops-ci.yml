@@ -486,7 +486,7 @@ jobs:
 
       - name: Generate GitHub App token
         id: app-token
-        if: ${{ steps.mode.outputs.mode != 'skip' && (steps.tool.outputs.run_gradle == 'true' || steps.tool.outputs.run_maven == 'true') && inputs.github-app-enabled }}
+        if: ${{ steps.mode.outputs.mode != 'skip' && (steps.tool.outputs.run_gradle == 'true' || steps.tool.outputs.run_maven == 'true') }}
         uses: actions/github-app-token@v1
         with:
           app-id: ${{ secrets.GITHUB_APP_ID }}

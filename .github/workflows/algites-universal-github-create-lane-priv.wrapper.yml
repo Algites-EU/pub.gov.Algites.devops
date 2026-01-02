@@ -21,8 +21,6 @@ on:
         required: false
         type: string
         default: ""
-    with:
-      github-app-enabled: ${{ secrets.PRIV_GITHUB_APP_ID != '' }}
     secrets:
       PRIV_GITHUB_APP_ID:
         required: true
