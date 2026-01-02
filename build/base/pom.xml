@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>eu.algites.tool.build</groupId>
+	<artifactId>pub.tool.Java_build.base-maven</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Algites Java Build - base (Maven parent)</name>
+	<description>Generated Maven parent POM for Algites base build conventions.</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<directory>${project.basedir}/run/bld</directory>
+
+		<filters>
+			<filter>src/product/config/versions.properties</filter>
+		</filters>
+
+
+		<resources>
+			<resource>
+				<directory>src/product/maven</directory>
+				<includes>
+					<include>base-pom.tpl</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<!-- Copy and filter template to target/base-parent.pom -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>filter-parent-pom</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/product/maven</directory>
+									<includes>
+										<include>base-pom.tpl</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Attach generated POM as the project artifact -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>attach-parent-pom</id>
+						<phase>package</phase>
+						<goals>
+							<goal>attach-artifact</goal>
+						</goals>
+						<configuration>
+							<artifacts>
+								<artifact>
+									<file>${project.build.directory}/base-pom.tpl</file>
+									<type>pom</type>
+								</artifact>
+							</artifacts>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>Algites.github.pub.tool.Java</id>
+			<url>https://maven.pkg.github.com/Algites-EU/pub.tool.Java</url>
+		</repository>
+		<snapshotRepository>
+			<id>Algites.github.pub.tool.Java</id>
+			<url>https://maven.pkg.github.com/Algites-EU/pub.tool.Java</url>
+		</snapshotRepository>
+	</distributionManagement></project>
