@@ -654,17 +654,20 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "$root/gradlew" || true
-          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
+  
+          ALGITES_VERSION=""
           EXTRA=""
-          if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-
+          if [[ -n "$ALGITES_VERSION" ]]; then
+            EXTRA="-PalgitesVersion=$ALGITES_VERSION"
+          fi
+          
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
             echo "=== Gradle verify in: $root ==="
-            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
+          
+            chmod +x "$root/gradlew" || true
+            "$root/gradlew" --no-daemon -p "$root" $EXTRA check
           done <<< "${{ steps.roots.outputs.list }}"
-
 
       - name: Maven - verify
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
