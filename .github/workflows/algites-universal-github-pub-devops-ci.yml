@@ -560,7 +560,6 @@ jobs:
         with:
           app-id: ${{ secrets.GITHUB_APP_ID }}
           private-key: ${{ secrets.GITHUB_APP_PEM }}
-          installation-id: ${{ secrets.GITHUB_APP_INSTALLATION_ID }}
 
       # -------------------------
       # Compile-only mode
