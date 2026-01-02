@@ -1,0 +1,141 @@
+name: Algites Universal Create Lane
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_lane:
+        description: "Source lane (e.g. 1.1.x)"
+        required: true
+      new_lane:
+        description: "New lane (e.g. 1.2.x)"
+        required: true
+      variants:
+        description: "auto (discover) or explicit list"
+        required: false
+        default: "auto"
+      variants_explicit:
+        description: "Comma-separated variants when variants=explicit (e.g. jvm17,and21)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate lanes
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${{ inputs.source_lane }}"
+          NEW="${{ inputs.new_lane }}"
+          for L in "$SRC" "$NEW"; do
+            if [[ ! "$L" =~ ^[0-9]+\.[0-9]+\.x$ ]]; then
+              echo "ERROR: lane must be <A>.<B>.x. Got: '$L'." >&2
+              exit 1
+            fi
+          done
+
+      - name: Discover variants
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${{ inputs.source_lane }}"
+          MODE="${{ inputs.variants }}"
+          MODE="$(echo "$MODE" | tr '[:upper:]' '[:lower:]')"
+
+          git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
+
+          VARS=()
+          if [[ "$MODE" == "explicit" ]]; then
+            RAW="${{ inputs.variants_explicit }}"
+            RAW="${RAW// /}"
+            if [[ -z "$RAW" ]]; then
+              echo "ERROR: variants=explicit but variants_explicit is empty." >&2
+              exit 1
+            fi
+            IFS=',' read -r -a VARS <<< "$RAW"
+          else
+            while IFS= read -r br; do
+              br="${br#origin/}"
+              if [[ "$br" =~ ^([^/]+)/lane/${SRC}$ ]]; then
+                VARS+=("${BASH_REMATCH[1]}")
+              fi
+            done < <(git for-each-ref --format='%(refname:short)' "refs/remotes/origin/*/lane/${SRC}" || true)
+
+            if (( ${#VARS[@]} > 0 )); then
+              VARS=($(printf "%s\n" "${VARS[@]}" | sort -u))
+            fi
+          fi
+
+          if (( ${#VARS[@]} == 0 )); then
+            echo "ERROR: No variants discovered for source lane '${SRC}'." >&2
+            exit 1
+          fi
+
+          CSV="$(IFS=','; echo "${VARS[*]}")"
+          echo "variants_csv=$CSV" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Create lane variants"
+            echo ""
+            echo '```'
+            echo "$CSV"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create new lane branches (per variant)
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${{ inputs.source_lane }}"
+          NEW="${{ inputs.new_lane }}"
+          CSV="${{ steps.vars.outputs.variants_csv }}"
+
+          git config user.name "algites-ci"
+          git config user.email "ci@algites.eu"
+
+          IFS=',' read -r -a VARS <<< "$CSV"
+          for V in "${VARS[@]}"; do
+            FROM="${V}/lane/${SRC}"
+            TO="${V}/lane/${NEW}"
+
+            if ! git show-ref --verify --quiet "refs/remotes/origin/${FROM}"; then
+              echo "WARNING: Source branch missing: ${FROM}. Skipping."
+              continue
+            fi
+
+            if git show-ref --verify --quiet "refs/remotes/origin/${TO}"; then
+              echo "WARNING: Target already exists: ${TO}. Skipping."
+              continue
+            fi
+
+            TMP="create-lane/${TO}-$(date +%Y%m%d%H%M%S)"
+            git switch -c "$TMP" "refs/remotes/origin/${FROM}"
+
+            if [[ ! -f "algites-repository.properties" ]]; then
+              echo "ERROR: algites-repository.properties not found in repo root on ${FROM}." >&2
+              exit 1
+            fi
+
+            if grep -qE '^repo\.lane=' algites-repository.properties; then
+              sed -i "s/^repo\.lane=.*/repo.lane=${NEW}/" algites-repository.properties
+            else
+              echo "repo.lane=${NEW}" >> algites-repository.properties
+            fi
+
+            git add algites-repository.properties
+            git commit -m "Create lane ${TO} (from ${FROM})"
+            git push origin "HEAD:${TO}"
+
+            git switch -
+            git branch -D "$TMP" || true

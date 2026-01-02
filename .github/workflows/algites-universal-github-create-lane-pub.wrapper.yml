@@ -1,0 +1,48 @@
+name: Algites Universal Create Lane (Public Repo Wrapper)
+
+on:
+  workflow_call:
+    inputs:
+      source_lane:
+        description: "Source lane (e.g. 1.1.x)"
+        required: true
+        type: string
+      new_lane:
+        description: "New lane (e.g. 1.2.x)"
+        required: true
+        type: string
+      variants:
+        description: "auto (discover) or explicit"
+        required: false
+        type: string
+        default: "auto"
+      variants_explicit:
+        description: "Comma-separated variants when variants=explicit (e.g. jvm17,and21)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      PUB_GITHUB_APP_ID:
+        required: true
+      PUB_GITHUB_APP_INSTALLATION_ID:
+        required: true
+      PUB_GITHUB_APP_PEM:
+        required: true
+
+# NOTE: Caller workflow must grant at least:
+# permissions:
+#   contents: write
+# otherwise nested workflow permissions may be downgraded.
+
+jobs:
+  create-lane:
+    uses: Algites-EU/pub.dov.Algites.devops/.github/workflows/algites-universal-github-create-lane.yml@main
+    with:
+      source_lane: ${{ inputs.source_lane }}
+      new_lane: ${{ inputs.new_lane }}
+      variants: ${{ inputs.variants }}
+      variants_explicit: ${{ inputs.variants_explicit }}
+    secrets:
+      GITHUB_APP_ID: ${{ secrets.PUB_GITHUB_APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.PUB_GITHUB_APP_INSTALLATION_ID }}
+      GITHUB_APP_PEM: ${{ secrets.PUB_GITHUB_APP_PEM }}
