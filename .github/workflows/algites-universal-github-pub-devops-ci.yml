@@ -571,7 +571,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
+          chmod +x "$root/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
@@ -579,7 +579,7 @@ jobs:
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
             echo "=== Gradle compile in: $root ==="
-            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-compile-task }}
+            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-compile-task }}
           done <<< "${{ steps.roots.outputs.list }}"
 
 
@@ -613,7 +613,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
+          chmod +x "$root/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
@@ -621,7 +621,7 @@ jobs:
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
             echo "=== Gradle test in: $root ==="
-            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
+            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
           done <<< "${{ steps.roots.outputs.list }}"
 
 
@@ -655,7 +655,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
+          chmod +x "$root/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
@@ -663,7 +663,7 @@ jobs:
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
             echo "=== Gradle verify in: $root ==="
-            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
+            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
           done <<< "${{ steps.roots.outputs.list }}"
 
 
