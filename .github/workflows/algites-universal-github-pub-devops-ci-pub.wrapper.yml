@@ -14,12 +14,9 @@ on:
         type: string
         default: ""
     secrets:
-      PUB_GITHUB_APP_ID:
-        required: true
-      PUB_GITHUB_APP_INSTALLATION_ID:
-        required: true
-      PUB_GITHUB_APP_PEM:
-        required: true
+      GITHUB_APP_ID: ${{ secrets.PUB_GITHUB_APP_ID }}
+      GITHUB_APP_PEM: ${{ secrets.PUB_GITHUB_APP_PEM }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.PUB_GITHUB_APP_INSTALLATION_ID }}
 
 jobs:
   ci:
