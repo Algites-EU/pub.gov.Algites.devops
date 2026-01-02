@@ -412,19 +412,19 @@ jobs:
           fi
 
           # Sanity + fallback based on repo contents
-          if [[ "$run_gradle" == "true" && ! -f "./gradlew" ]]; then
+          if [[ "$run_gradle" == "true" && ! -f "${GITHUB_WORKSPACE}/gradlew" ]]; then
             if [[ "$run_maven" == "false" && -f "pom.xml" ]]; then
-              echo "Gradle selected but ./gradlew not found; falling back to Maven (pom.xml present)."
+              echo "Gradle selected but ${GITHUB_WORKSPACE}/gradlew not found; falling back to Maven (pom.xml present)."
               run_gradle=false
               run_maven=true
             else
-              echo "::error::Gradle selected but ./gradlew not found."
+              echo "::error::Gradle selected but ${GITHUB_WORKSPACE}/gradlew not found."
               exit 1
             fi
           fi
 
           if [[ "$run_maven" == "true" && ! -f "pom.xml" ]]; then
-            if [[ "$run_gradle" == "false" && -f "./gradlew" ]]; then
+            if [[ "$run_gradle" == "false" && -f "${GITHUB_WORKSPACE}/gradlew" ]]; then
               echo "Maven selected but pom.xml not found; falling back to Gradle (gradlew present)."
               run_maven=false
               run_gradle=true
@@ -502,11 +502,11 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ./gradlew || true
+          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
+          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
 
       - name: Maven - compile only
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'compile' }}
@@ -528,11 +528,11 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ./gradlew || true
+          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
 
       - name: Maven - tests only
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'test' }}
@@ -554,11 +554,11 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ./gradlew || true
+          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ./gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
 
       - name: Maven - verify
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
