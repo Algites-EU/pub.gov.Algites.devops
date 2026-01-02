@@ -438,6 +438,75 @@ jobs:
           echo "run_gradle=$run_gradle" >> "$GITHUB_OUTPUT"
           echo "run_maven=$run_maven" >> "$GITHUB_OUTPUT"
 
+      - name: Discover artifact roots (algites-build.properties)
+        id: roots
+        if: ${{ steps.mode.outputs.mode != 'skip' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Artifact roots are determined by the presence of algites-build.properties.
+          # - If at least one algites-build.properties exists anywhere in the repo, we run CI for each such directory.
+          # - Optional per-root skip:
+          #     algites-build.properties:
+          #       skip=true
+          # - We do NOT descend into a directory once it is considered a root (prevents nested double-roots).
+
+          is_skipped_dir() {
+            local d="$1"
+            local v
+            v="$(grep -E '^[[:space:]]*skip[[:space:]]*=' "$d/algites-build.properties" | head -n1 | sed -E 's/^[[:space:]]*skip[[:space:]]*=[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r\n')"
+            [[ "${v,,}" == "true" ]]
+          }
+
+          roots=()
+          queue=(".")
+          found_marker=false
+
+          while ((${#queue[@]})); do
+            d="${queue[0]}"
+            queue=("${queue[@]:1}")
+
+            # normalize
+            [[ "$d" == "." ]] || d="${d#./}"
+
+            if [[ -f "$d/algites-build.properties" ]]; then
+              found_marker=true
+              if is_skipped_dir "$d"; then
+                echo "Skipping root (skip=true): $d"
+              else
+                roots+=("$d")
+              fi
+              continue
+            fi
+
+            # descend (ignore heavy/irrelevant dirs)
+            for c in "$d"/*; do
+              [[ -d "$c" ]] || continue
+              bn="$(basename "$c")"
+              case "$bn" in
+                .git|.github|.gradle|run|bld|build|target|out|node_modules) continue ;;
+              esac
+              queue+=("$c")
+            done
+          done
+
+          # If no marker exists anywhere, fall back to repo root (single-module legacy repos).
+          if [[ "$found_marker" != "true" ]]; then
+            roots=(".")
+          fi
+
+          printf "%s\n" "${roots[@]}" | sed 's|^\./||' > /tmp/algites-roots.txt
+          echo "Artifact roots:"
+          cat /tmp/algites-roots.txt
+
+          # expose as multiline output
+          {
+            echo "list<<EOF"
+            cat /tmp/algites-roots.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Detect Java version
         id: detect-java
         if: ${{ inputs.java-version == '' && steps.mode.outputs.mode != 'skip' }}
@@ -502,11 +571,17 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            echo "=== Gradle compile in: $root ==="
+            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-compile-task }}
+          done <<< "${{ steps.roots.outputs.list }}"
+
 
       - name: Maven - compile only
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'compile' }}
@@ -517,7 +592,17 @@ jobs:
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
-          mvn -B $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            if [[ -f "$root/pom.xml" ]]; then
+              echo "=== Maven compile in: $root ==="
+              mvn -B -f "$root/pom.xml" $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
+            else
+              echo "=== Maven compile skipped (no pom.xml) in: $root ==="
+            fi
+          done <<< "${{ steps.roots.outputs.list }}"
+
 
       # -------------------------
       # Test-only mode
@@ -528,11 +613,17 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            echo "=== Gradle test in: $root ==="
+            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
+          done <<< "${{ steps.roots.outputs.list }}"
+
 
       - name: Maven - tests only
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'test' }}
@@ -543,7 +634,17 @@ jobs:
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
-          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            if [[ -f "$root/pom.xml" ]]; then
+              echo "=== Maven test in: $root ==="
+              mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-test-goal }}
+            else
+              echo "=== Maven test skipped (no pom.xml) in: $root ==="
+            fi
+          done <<< "${{ steps.roots.outputs.list }}"
+
 
       # -------------------------
       # Verify mode (no deployment)
@@ -554,11 +655,17 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x ${GITHUB_WORKSPACE}/gradlew || true
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
-          ${GITHUB_WORKSPACE}/gradlew --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            echo "=== Gradle verify in: $root ==="
+            "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
+          done <<< "${{ steps.roots.outputs.list }}"
+
 
       - name: Maven - verify
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
@@ -569,7 +676,16 @@ jobs:
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
-          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+
+          while IFS= read -r root; do
+            [[ -z "$root" ]] && continue
+            if [[ -f "$root/pom.xml" ]]; then
+              echo "=== Maven verify in: $root ==="
+              mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-test-goal }}
+            else
+              echo "=== Maven verify skipped (no pom.xml) in: $root ==="
+            fi
+          done <<< "${{ steps.roots.outputs.list }}"
 
 
       - name: Skip (non-matching branch)
