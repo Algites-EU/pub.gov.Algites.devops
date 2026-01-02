@@ -17,6 +17,11 @@ on:
         description: "Comma-separated variants when variants=explicit (e.g. jvm17,and21)"
         required: false
         default: ""
+      github-app-enabled:
+        type: boolean
+        description: "Indication the Github Application for the task is enabled"
+        required: false
+        default: false
 
 permissions:
   contents: write

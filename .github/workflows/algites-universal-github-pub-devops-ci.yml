@@ -53,6 +53,11 @@ on:
         required: false
         type: string
         default: "compile"
+      github-app-enabled:
+        type: boolean
+        description: "Indication the Github Application for the task is enabled"
+        required: false
+        default: false
 
     secrets:
       GITHUB_APP_ID:
@@ -481,7 +486,7 @@ jobs:
 
       - name: Generate GitHub App token
         id: app-token
-        if: ${{ steps.mode.outputs.mode != 'skip' && (steps.tool.outputs.run_gradle == 'true' || steps.tool.outputs.run_maven == 'true') && secrets.GITHUB_APP_ID != '' && secrets.GITHUB_APP_PEM != '' && secrets.GITHUB_APP_INSTALLATION_ID != '' }}
+        if: ${{ steps.mode.outputs.mode != 'skip' && (steps.tool.outputs.run_gradle == 'true' || steps.tool.outputs.run_maven == 'true') && inputs.github-app-enabled }}
         uses: actions/github-app-token@v1
         with:
           app-id: ${{ secrets.GITHUB_APP_ID }}
