@@ -647,7 +647,7 @@ jobs:
           fi
           
           echo "=== Gradle verify (test+integration test, with packaging) ==="
-          "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-verify-task }}
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-verify-task }}
           <<< "${{ steps.roots.outputs.list }}"
 
       - name: Maven - verify (test+integration test, with packaging)
