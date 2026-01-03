@@ -577,7 +577,7 @@ jobs:
 
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
-            echo "=== Gradle compile in: $root ==="
+            echo "=== Gradle compile (including test sources, without test execution) in: $root ==="
             "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-compile-task }}
           done <<< "${{ steps.roots.outputs.list }}"
 
@@ -595,7 +595,7 @@ jobs:
           while IFS= read -r root; do
             [[ -z "$root" ]] && continue
             if [[ -f "$root/pom.xml" ]]; then
-              echo "=== Maven compile in: $root ==="
+              echo "=== Maven compile (including test sources, without test execution) in: $root ==="
               mvn -B -f "$root/pom.xml" $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
             else
               echo "=== Maven compile skipped (no pom.xml) in: $root ==="
