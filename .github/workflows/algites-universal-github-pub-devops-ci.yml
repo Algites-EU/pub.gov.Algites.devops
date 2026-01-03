@@ -21,16 +21,16 @@ on:
         default: ""
 
       # Optional: override Gradle tasks
-      gradle-publish-task:
-        description: "Gradle task to publish"
+      gradle-verify-task:
+        description: "Gradle task to perform test with packaging and full verification (check)"
         required: false
         type: string
-        default: "publish"
+        default: "check"
       gradle-test-task:
         description: "Gradle task to run tests only"
         required: false
         type: string
-        default: "check"
+        default: "test integrationTest"
       gradle-compile-task:
         description: "Gradle task to compile only (no test executions)"
         required: false
@@ -38,16 +38,16 @@ on:
         default: "testClasses"
 
       # Optional: override Maven goals/phases
-      maven-publish-goal:
-        description: "Maven goal/phase to publish"
+      maven-verify-goal:
+        description: "Maven goal/phase to perform test with packaging and full verification (verify)"
         required: false
         type: string
-        default: "deploy"
+        default: "verify"
       maven-test-goal:
         description: "Maven goal/phase to run tests only"
         required: false
         type: string
-        default: "verify"
+        default: "-DskipPackaging=true verify"
       maven-compile-goal:
         description: "Maven goal/phase to compile only (no test executions)"
         required: false
@@ -90,8 +90,8 @@ jobs:
           echo "Branch: $REF"
 
           # 1) Feature test runs: compile only (no tests, no publish/deploy/install)
-          if [[ "$REF" == *"/feature-testrun/"* || "$REF" == feature-testrun/* ]]; then
-            echo "mode=verify" >> "$GITHUB_OUTPUT"
+          if [[ "$REF" == *"/develop" || "$REF" == develop ]]; then
+            echo "mode=test" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -108,7 +108,7 @@ jobs:
           fi
 
           # 4) Verify branches: main/master/develop/hotfix and also */main, */master, */develop, */hotfix
-          if [[ "$REF" == "main" || "$REF" == "master" || "$REF" == "develop" || "$REF" == "hotfix" || "$REF" == */main || "$REF" == */master || "$REF" == */develop || "$REF" == */hotfix ]]; then
+          if [[ "$REF" == "main" || "$REF" == "master" || "$REF" == "hotfix" || "$REF" == */main || "$REF" == */master || "$REF" == */hotfix ]]; then
             echo "mode=verify" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -144,7 +144,7 @@ jobs:
           # Determine variant as the first segment (must not be 'lane' itself).
           PREFIX="${BRANCH%%/*}"
           case "$PREFIX" in
-            lane|feature|feature-testrun|main|master|develop|hotfix)
+            lane|feature|main|master|develop|hotfix)
               echo "::error::Lane branches must be variant-prefixed, e.g. 'jvm17/lane/1.1.x' (got '$BRANCH')."
               exit 1
               ;;
@@ -570,16 +570,14 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "$root/gradlew" || true
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
 
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            echo "=== Gradle compile (including test sources, without test execution) in: $root ==="
-            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-compile-task }}
-          done <<< "${{ steps.roots.outputs.list }}"
+          echo "=== Gradle compile (including test sources, without test execution) in: $root ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
+          <<< "${{ steps.roots.outputs.list }}"
 
 
       - name: Maven - compile only
@@ -592,39 +590,31 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            if [[ -f "$root/pom.xml" ]]; then
-              echo "=== Maven compile (including test sources, without test execution) in: $root ==="
-              mvn -B -f "$root/pom.xml" $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
-            else
-              echo "=== Maven compile skipped (no pom.xml) in: $root ==="
-            fi
-          done <<< "${{ steps.roots.outputs.list }}"
+          echo "=== Maven compile (including test sources, without test execution) in: $root ==="
+          mvn -B $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
+          <<< "${{ steps.roots.outputs.list }}"
 
 
       # -------------------------
       # Test-only mode
       # -------------------------
-      - name: Gradle - tests only
+      - name: Gradle - test+integration test, no packaging only
         if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'test' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          chmod +x "$root/gradlew" || true
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
           ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
 
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            echo "=== Gradle test in: $root ==="
-            "$root/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-test-task }}
-          done <<< "${{ steps.roots.outputs.list }}"
+          echo "=== Gradle test+integration test, no packaging ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+          <<< "${{ steps.roots.outputs.list }}"
 
 
-      - name: Maven - tests only
+      - name: Maven - test+integration test, no packaging
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'test' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -634,42 +624,33 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            if [[ -f "$root/pom.xml" ]]; then
-              echo "=== Maven test in: $root ==="
-              mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-test-goal }}
-            else
-              echo "=== Maven test skipped (no pom.xml) in: $root ==="
-            fi
-          done <<< "${{ steps.roots.outputs.list }}"
+          echo "=== Maven test+integration test, no packaging"
+          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+          <<< "${{ steps.roots.outputs.list }}"
 
 
       # -------------------------
       # Verify mode (no deployment)
       # -------------------------
-      - name: Gradle - verify
+      - name: Gradle - verify (test+integration test, with packaging)
         if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'verify' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
+          chmod +x "${GITHUB_WORKSPACE}/gradlew" || true
   
-          ALGITES_VERSION=""
+          ALGITES_VERSION="${{ steps.lanever.outputs.snapshot_version }}"
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then
             EXTRA="-PalgitesVersion=$ALGITES_VERSION"
           fi
           
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            echo "=== Gradle verify in: $root ==="
-          
-            chmod +x "$root/gradlew" || true
-            "$root/gradlew" --no-daemon -p "$root" $EXTRA check
-          done <<< "${{ steps.roots.outputs.list }}"
+          echo "=== Gradle verify (test+integration test, with packaging) ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon -p "$root" $EXTRA ${{ inputs.gradle-verify-task }}
+          <<< "${{ steps.roots.outputs.list }}"
 
-      - name: Maven - verify
+      - name: Maven - verify (test+integration test, with packaging)
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -679,18 +660,11 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
-          while IFS= read -r root; do
-            [[ -z "$root" ]] && continue
-            if [[ -f "$root/pom.xml" ]]; then
-              echo "=== Maven verify in: $root ==="
-              mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-test-goal }}
-            else
-              echo "=== Maven verify skipped (no pom.xml) in: $root ==="
-            fi
-          done <<< "${{ steps.roots.outputs.list }}"
-
+          echo "=== Maven verify (test+integration test, with packaging) ==="
+          mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-verify-goal }}
+          <<< "${{ steps.roots.outputs.list }}"
 
       - name: Skip (non-matching branch)
         if: ${{ steps.mode.outputs.mode == 'skip' }}
         run: |
-          echo "Mode=skip → no compile/test/publish for this branch."
+          echo "Mode=skip → no compile/test/verify for this branch."
