@@ -21,35 +21,35 @@ on:
         default: ""
 
       # Optional: override Gradle tasks
-      gradle-verify-task:
-        description: "Gradle task to perform test with packaging and full verification (check)"
+      gradle-approval-task:
+        description: "Gradle task to perform the approval: test with packaging and full verification"
         required: false
         type: string
         default: "check"
-      gradle-test-task:
-        description: "Gradle task to run tests only"
+      gradle-verification-task:
+        description: "Gradle task to perform the verification: execution of all tests"
         required: false
         type: string
         default: "test integrationTest"
-      gradle-compile-task:
-        description: "Gradle task to compile only (no test executions)"
+      gradle-construction-task:
+        description: "Gradle task to perform the construction of the artifact: compilation of all classes and test classes (no test executions)"
         required: false
         type: string
         default: "testClasses"
 
       # Optional: override Maven goals/phases
-      maven-verify-goal:
-        description: "Maven goal/phase to perform test with packaging and full verification (verify)"
+      maven-approval-goal:
+        description: "Maven goal/phase to perform the approval: test with packaging and full verification"
         required: false
         type: string
         default: "verify"
-      maven-test-goal:
-        description: "Maven goal/phase to run tests only"
+      maven-verification-goal:
+        description: "Maven goal/phase to perform the verification: execution of all tests"
         required: false
         type: string
         default: "-DskipPackaging=true verify"
-      maven-compile-goal:
-        description: "Maven goal/phase to compile only (no test executions)"
+      maven-construction-goal:
+        description: "Maven goal/phase to perform the construction of the artifact: compilation of all classes and test classes (no test executions)"
         required: false
         type: string
         default: "test-compile"
@@ -562,9 +562,9 @@ jobs:
           private-key: ${{ secrets.GITHUB_APP_PEM }}
 
       # -------------------------
-      # Compile-only mode
+      # Construction mode
       # -------------------------
-      - name: Gradle - compile only
+      - name: Gradle construction only
         if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'compile' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -575,12 +575,12 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
 
-          echo "=== Gradle compile (including test sources, without test execution) in: $root ==="
-          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-compile-task }}
+          echo "=== Gradle construction: compile (including test sources, without test execution) ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-construction-task }}
           <<< "${{ steps.roots.outputs.list }}"
 
 
-      - name: Maven - compile only
+      - name: Maven construction only
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'compile' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -590,15 +590,15 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
-          echo "=== Maven compile (including test sources, without test execution) in: $root ==="
-          mvn -B $EXTRA -DskipTests ${{ inputs.maven-compile-goal }}
+          echo "=== Maven construction: compile (including test sources, without test execution) ==="
+          mvn -B $EXTRA -DskipTests ${{ inputs.maven-construction-goal }}
           <<< "${{ steps.roots.outputs.list }}"
 
 
       # -------------------------
-      # Test-only mode
+      # Verification mode
       # -------------------------
-      - name: Gradle - test+integration test, no packaging only
+      - name: Gradle verification
         if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'test' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -609,12 +609,12 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-PalgitesVersion=$ALGITES_VERSION"; fi
 
-          echo "=== Gradle test+integration test, no packaging ==="
-          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-test-task }}
+          echo "=== Gradle verification: test+integration test, no packaging ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-verification-task }}
           <<< "${{ steps.roots.outputs.list }}"
 
 
-      - name: Maven - test+integration test, no packaging
+      - name: Maven verification
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'test' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -625,14 +625,14 @@ jobs:
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
           echo "=== Maven test+integration test, no packaging"
-          mvn -B $EXTRA ${{ inputs.maven-test-goal }}
+          mvn -B $EXTRA ${{ inputs.maven-verification-goal }}
           <<< "${{ steps.roots.outputs.list }}"
 
 
       # -------------------------
-      # Verify mode (no deployment)
+      # Approval mode
       # -------------------------
-      - name: Gradle - verify (test+integration test, with packaging)
+      - name: Gradle approval
         if: ${{ steps.tool.outputs.run_gradle == 'true' && steps.mode.outputs.mode == 'verify' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -646,11 +646,11 @@ jobs:
             EXTRA="-PalgitesVersion=$ALGITES_VERSION"
           fi
           
-          echo "=== Gradle verify (test+integration test, with packaging) ==="
-          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-verify-task }}
+          echo "=== Gradle approval (test+integration test, with packaging) ==="
+          "${GITHUB_WORKSPACE}/gradlew" --no-daemon $EXTRA ${{ inputs.gradle-approval-task }}
           <<< "${{ steps.roots.outputs.list }}"
 
-      - name: Maven - verify (test+integration test, with packaging)
+      - name: Maven approval
         if: ${{ steps.tool.outputs.run_maven == 'true' && steps.mode.outputs.mode == 'verify' }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token != '' && steps.app-token.outputs.token || github.token }}
@@ -660,11 +660,11 @@ jobs:
           EXTRA=""
           if [[ -n "$ALGITES_VERSION" ]]; then EXTRA="-DalgitesVersion=$ALGITES_VERSION -Drevision=$ALGITES_VERSION"; fi
 
-          echo "=== Maven verify (test+integration test, with packaging) ==="
-          mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-verify-goal }}
+          echo "=== Maven approval (test+integration test, with packaging) ==="
+          mvn -B -f "$root/pom.xml" $EXTRA ${{ inputs.maven-approval-goal }}
           <<< "${{ steps.roots.outputs.list }}"
 
       - name: Skip (non-matching branch)
         if: ${{ steps.mode.outputs.mode == 'skip' }}
         run: |
-          echo "Mode=skip → no compile/test/verify for this branch."
+          echo "Mode=skip → no construction/verification/approval for this branch."
