@@ -32,10 +32,10 @@ on:
         type: string
         default: "check"
       gradle-compile-task:
-        description: "Gradle task to compile only (no tests)"
+        description: "Gradle task to compile only (no test executions)"
         required: false
         type: string
-        default: "classes"
+        default: "testClasses"
 
       # Optional: override Maven goals/phases
       maven-publish-goal:
@@ -49,10 +49,10 @@ on:
         type: string
         default: "verify"
       maven-compile-goal:
-        description: "Maven goal/phase to compile only (no tests)"
+        description: "Maven goal/phase to compile only (no test executions)"
         required: false
         type: string
-        default: "compile"
+        default: "test-compile"
       github-app-enabled:
         type: boolean
         description: "Indication the Github Application for the task is enabled"
