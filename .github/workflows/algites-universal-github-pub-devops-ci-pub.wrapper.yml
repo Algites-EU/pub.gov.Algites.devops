@@ -8,7 +8,7 @@ on:
         required: false
         type: string
         default: "auto"
-      java-version:
+      java-version_
         description: "Optional override: Java version (e.g. 17, 21). Empty = auto-detect."
         required: false
         type: string
@@ -27,7 +27,7 @@ jobs:
     uses: ./.github/workflows/algites-universal-github-pub-devops-ci.yml
     with:
       build-tool: ${{ inputs.build-tool }}
-      java-version: ${{ inputs.java-version }}
+      java-version_ ${{ inputs.java-version }}
     secrets:
       GITHUB_APP_ID: ${{ secrets.PUB_GITHUB_APP_ID }}
       GITHUB_APP_INSTALLATION_ID: ${{ secrets.PUB_GITHUB_APP_INSTALLATION_ID }}

@@ -4,37 +4,38 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>eu.algites.tool.build</groupId>
-	<artifactId>pub.tool.Java_build.base-maven</artifactId>
+	<artifactId>pub.gov.Algites.devops_build.policy.polarman</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 
-	<name>Algites Java Build - base (Maven parent)</name>
-	<description>Generated Maven parent POM for Algites base build conventions.</description>
+	<name>Algites Java Build - Policy Artifact Manager</name>
+	<description>Manager allowing the build and creation of new policy artifacts.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
-		<directory>${project.basedir}/run/bld</directory>
+		<directory>${project.basedir}/run/bld/maven</directory>
 
-		<filters>
-			<filter>src/product/config/versions.properties</filter>
-		</filters>
-
-
-		<resources>
-			<resource>
-				<directory>src/product/maven</directory>
-				<includes>
-					<include>base-pom.tpl</include>
-				</includes>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
+		<sourceDirectory>src/product/java</sourceDirectory>
+		<outputDirectory>run/product/classes</outputDirectory>
 
 		<plugins>
-			<!-- Copy and filter template to target/base-parent.pom -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
+				</configuration>
+			</plugin>
+
+<!--
+			&lt;!&ndash; Copy and filter template to target/base-parent.pom &ndash;&gt;
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -52,7 +53,14 @@
 								<resource>
 									<directory>src/product/maven</directory>
 									<includes>
-										<include>base-pom.tpl</include>
+										<include>pom.xml.tpl</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>src/product/gradle</directory>
+									<includes>
+										<include>plugin.kt.tpl</include>
 									</includes>
 									<filtering>true</filtering>
 								</resource>
@@ -63,14 +71,14 @@
 				</executions>
 			</plugin>
 
-			<!-- Attach generated POM as the project artifact -->
+			&lt;!&ndash; Attach generated POM as the project artifact &ndash;&gt;
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>3.5.0</version>
 				<executions>
 					<execution>
-						<id>attach-parent-pom</id>
+						<id>add-source-folders</id>
 						<phase>package</phase>
 						<goals>
 							<goal>attach-artifact</goal>
@@ -78,7 +86,7 @@
 						<configuration>
 							<artifacts>
 								<artifact>
-									<file>${project.build.directory}/base-pom.tpl</file>
+									<file>${project.build.directory}/pom.xml.tpl</file>
 									<type>pom</type>
 								</artifact>
 							</artifacts>
@@ -86,16 +94,19 @@
 					</execution>
 				</executions>
 			</plugin>
+-->
 		</plugins>
 	</build>
 
 	<distributionManagement>
-		<repository>
-			<id>Algites.github.pub.tool.Java</id>
-			<url>https://maven.pkg.github.com/Algites-EU/pub.tool.Java</url>
-		</repository>
 		<snapshotRepository>
-			<id>Algites.github.pub.tool.Java</id>
-			<url>https://maven.pkg.github.com/Algites-EU/pub.tool.Java</url>
+			<id>algites-public-releases-upload</id>
+			<url>https://maven.cloudsmith.io/algites/maven-snapshots-pub/</url>
 		</snapshotRepository>
-	</distributionManagement></project>
+		<repository>
+			<id>cloudsmith</id>
+<!--			<id>algites-public-snapshots-upload</id>-->
+			<url>https://dl.cloudsmith.io/algites/maven-snapshots-pub/</url>
+		</repository>
+	</distributionManagement>
+</project>

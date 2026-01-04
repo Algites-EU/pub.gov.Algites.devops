@@ -26,7 +26,8 @@
 	  Only aggregation – no inheritance implied.
 	-->
 	<modules>
-		<module>build/base</module>
+		<module>build/policy/base</module>
+		<module>build/policy/polarman</module>
 	</modules>
 
 	<!--

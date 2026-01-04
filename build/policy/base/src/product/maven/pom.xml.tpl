@@ -5,9 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- Published parent POM generated from this template -->
-	<groupId>eu.algites.tool.build</groupId>
-	<artifactId>pub.tool.Java_build.base-maven</artifactId>
-	<version>@project.build.tool.version@</version>
+	<groupId>@algites.policy.artifact.groupId@</groupId>
+	<artifactId>@algites.policy.artifact.artifactIdBase@-maven</artifactId>
+	<version>@algites.repository.lane@.@algites.repository.lane.revision@@algites.repository.lane.revision.suffix@</version>
 	<packaging>pom</packaging>
 
 	<name>Algites Build - Base (Maven parent)</name>
@@ -15,8 +15,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<!-- Governance -->
-		<algites.build.base.pub.policy.version>@algites.build.base.pub.policy.version@</algites.build.base.pub.policy.version>
+		<policy.version_@algites.policy.id@>@algites.policy.version@</policy.version_@algites.policy.id@>
 
 		<!-- Tooling -->
 		<algites.maven.enforcer.version>3.5.0</algites.maven.enforcer.version>
@@ -103,5 +104,17 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+
+	<distributionManagement>
+		<repository>
+			<id>algites-public-releases-upload</id>
+			<url>https://central.sonatype.com/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>algites-public-snapshots-upload</id>
+			<url>https://dl.cloudsmith.io/maven/algites/maven-snapshots-pub/</url>
+<!--			<url>https://maven.cloudsmith.io/algites/maven-snapshots-pub/</url>-->
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>

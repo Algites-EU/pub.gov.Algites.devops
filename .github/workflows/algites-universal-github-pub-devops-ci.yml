@@ -14,7 +14,7 @@ on:
         default: "auto"
 
       # Optional: override Java version. If empty, it will be auto-detected.
-      java-version:
+      java-version_
         description: "Java version (e.g. 17, 21). If empty, auto-detect."
         required: false
         type: string
@@ -551,7 +551,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ inputs.java-version != '' && inputs.java-version || steps.detect-java.outputs.version }}
+          java-version_ ${{ inputs.java-version != '' && inputs.java-version || steps.detect-java.outputs.version }}
 
       - name: Generate GitHub App token
         id: app-token

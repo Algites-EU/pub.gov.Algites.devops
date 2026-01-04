@@ -1,0 +1,381 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>eu.algites.tool.build</groupId>
+	<artifactId>pub.gov.Algites.devops_build.policy.base</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Algites Java Build - base policy (Maven parent)</name>
+	<description>Generated Maven parent POM for Algites base build conventions.</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<algites.repository.kind>public</algites.repository.kind>
+	</properties>
+
+	<build>
+		<directory>${project.basedir}/run/bld/maven</directory>
+
+		<filters>
+			<filter>algites-policy-artifact.properties</filter>
+		</filters>
+
+
+		<resources>
+			<resource>
+				<directory>src/product/maven</directory>
+				<includes>
+					<include>pom.xml.tpl</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/product/gradle</directory>
+				<includes>
+					<include>plugin.kt.tpl</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<!-- Copy and filter template to target/base-parent.pom -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>filter-pom</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-sources/pom</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/product/maven</directory>
+									<includes>
+										<include>pom.xml.tpl</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>src/product/gradle</directory>
+									<includes>
+										<include>plugin.kt.tpl</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>
+					<execution>
+						<id>filter-kt</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-sources/kotlin</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/product/gradle</directory>
+									<includes>
+										<include>plugin.kt.tpl</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+							<overwrite>true</overwrite>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>polarman-build-base</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>
+								eu.algites.tool.build.policy.polarman.AIcPolicyArtifactManager
+							</mainClass>
+							<arguments>
+								<argument>generate</argument>
+								<argument>--root</argument>
+								<argument>${project.basedir}</argument>
+								<argument>--out</argument>
+								<argument>${project.build.directory}/generated-sources</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+
+					<!-- detect snapshot vs release -->
+					<execution>
+						<id>detect-snapshots-repository-stage</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<!-- kam uložit výsledek -->
+							<name>algites.repository.stage</name>
+
+							<!-- vstup -->
+							<value>${project.version}</value>
+
+							<!-- když matchne -->
+							<regex>(?i).*-snapshot$</regex>
+							<replacement>snapshots</replacement>
+							<failIfNoMatch>false</failIfNoMatch>
+						</configuration>
+					</execution>
+					<execution>
+						<id>detect-releases-repository-stage</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<!-- kam uložit výsledek -->
+							<name>algites.repository.stage</name>
+
+							<!-- vstup -->
+							<value>${project.version}</value>
+
+							<!-- když matchne -->
+							<regex>(?i)^(?!.*-snapshot$).*</regex>
+							<replacement>releases</replacement>
+							<failIfNoMatch>false</failIfNoMatch>
+						</configuration>
+					</execution>
+					<execution>
+						<id>assembly-deploy-repository-id</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<!-- kam uložit výsledek -->
+							<name>algites.deploy.repositoryId</name>
+
+							<!-- vstup -->
+							<value>${algites.repository.stage}</value>
+
+							<!-- když matchne -->
+							<regex>.+</regex>
+							<replacement>algites-${algites.repository.kind}-${algites.repository.stage}-upload</replacement>
+							<failIfNoMatch>true</failIfNoMatch>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>enforce-deploy-repo</id>
+						<phase>install</phase>
+						<goals><goal>enforce</goal></goals>
+						<configuration>
+							<rules>
+								<requireProperty>
+									<property>algites.deploy.repositoryId</property>
+									<message>
+										algites.deploy.repositoryId must be set (snapshot/release detection failed).
+									</message>
+								</requireProperty>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>install-policy-maven-pom</id>
+						<phase>install</phase>
+						<goals><goal>install-file</goal></goals>
+						<configuration>
+							<file>${generated.dir}/policy-pom/pom.xml</file>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${policy.maven.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<packaging>pom</packaging>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-policy-gradle-plugin</id>
+						<phase>install</phase>
+						<goals><goal>install-file</goal></goals>
+						<configuration>
+							<file>build/libs/${policy.gradle.artifactId}-${project.version}.jar</file>
+							<groupId>${project.groupId}</groupId>
+							<artifactId>${policy.gradle.artifactId}</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.1.4</version>
+				<executions>
+					<!-- Deploy filtered parent POM as a separate artifact -->
+					<execution>
+						<id>deploy-parent-pom</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-file</goal>
+						</goals>
+						<configuration>
+							<file>${project.build.directory}//generated-sources/pom/pom.xml.tpl</file>
+							<groupId>eu.algites.tool.build</groupId>
+							<artifactId>pub.gov.Algites.devops_build.base-maven</artifactId>
+							<version>${project.version}</version>
+							<packaging>pom</packaging>
+							<repositoryId>
+								${algites.deploy.repositoryId}
+							</repositoryId>
+						</configuration>
+					</execution>
+					<execution>
+						<id>deploy-gradle-plugin</id>
+						<phase>deploy</phase>
+						<goals><goal>deploy-file</goal></goals>
+						<configuration>
+							<file>${project.build.directory}/${project.artifactId}-${project.version}-gradle.jar</file>
+							<groupId>eu.algites.tool.build</groupId>
+							<artifactId>pub.gov.Algites.devops_build.base-gradle</artifactId>
+							<version>${project.version}</version>
+							<packaging>jar</packaging>
+							<repositoryId>
+								${algites.deploy.repositoryId}
+							</repositoryId>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-maven-plugin</artifactId>
+				<version>1.9.0</version>  <!-- use the appropriate Kotlin version -->
+				<executions>
+					<execution>
+						<id>compile-kotlin-plugin</id>
+						<phase>compile</phase>
+						<goals><goal>compile</goal></goals>
+						<configuration>
+							<!-- Include the filtered source file directory: -->
+							<sourceDirs>
+								<sourceDir>${project.build.directory}/generated-sources/kotlin</sourceDir>
+							</sourceDirs>
+						</configuration>
+					</execution>
+				</executions>
+				<!-- Include Kotlin stdlib as needed for compilation: -->
+				<dependencies>
+					<dependency>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-stdlib-jdk8</artifactId>
+						<version>1.9.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>package-gradle-plugin</id>
+						<phase>package</phase>
+						<goals><goal>jar</goal></goals>
+						<configuration>
+							<classifier>gradle</classifier>
+							<includes>
+								<include>eu/algites/tool/build/**</include>  <!-- your plugin classes -->
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+<!--
+			&lt;!&ndash; Attach generated POM as the project artifact &ndash;&gt;
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>attach-parent-pom</id>
+						<phase>package</phase>
+						<goals>
+							<goal>attach-artifact</goal>
+						</goals>
+						<configuration>
+							<artifacts>
+								<artifact>
+									<file>${project.build.directory}/pom.xml.tpl</file>
+									<type>pom</type>
+								</artifact>
+							</artifacts>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+-->
+		</plugins>
+
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>eu.algites.tool.build</groupId>
+			<artifactId>pub.gov.Algites.devops_build.policy.polarman</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>algites-public-releases-upload</id>
+			<url>https://central.sonatype.com/service/local/staging/deploy/maven2/</url>
+		</repository>
+		<snapshotRepository>
+			<id>algites-public-snapshots-upload</id>
+			<url>https://dl.cloudsmith.io/maven/algites/maven-snapshots-pub/</url>
+<!--			<url>https://maven.cloudsmith.io/algites/maven-snapshots-pub/</url>-->
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

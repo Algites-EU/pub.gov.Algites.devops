@@ -8,13 +8,14 @@ import org.gradle.api.Project
  *
  * Naming: AIc = Algites class
  */
+// @TODO - class from this one, also Id here and then have static list of all policies applied, where the descendat will register own lopicy, this will verify the policy id
 object AIoAlgitesBuildBasePublicPolicy {
 
     const val VERSION =
-        "@algites.build.base.pub.policy.version@"
+        "@algites.policy.version@";;;
 }
 
-protected data class AlgitesPropertiesFile(
+protected data class AIdAlgitesPropertiesFile(
     val file: File,
     val required: Boolean
 )
@@ -33,7 +34,7 @@ class AIcAlgitesBuildBasePublicPlugin : Plugin<Project> {
         pluginManager.apply("maven-publish")
 
         // Common layout conventions
-        layout.buildDirectory.set(file("run/bld"))
+        layout.buildDirectory.set(file("run/bld/gradle"))
 
         // Load Algites versions
         loadAlgitesProperties(this)

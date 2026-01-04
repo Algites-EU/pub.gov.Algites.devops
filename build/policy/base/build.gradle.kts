@@ -6,7 +6,7 @@ import java.util.Properties
 // - publishes ONLY generated artifacts (not root pom.xml)
 // ============================================================
 
-layout.buildDirectory.set(file("run/bld"))
+layout.buildDirectory.set(file("run/bld/gradle"))
 
 plugins {
     `kotlin-dsl`
@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "eu.algites.tool.build"
-version = loadAlgitesVersions()["project.build.tool.version"] ?: "0.0.0-LOCAL"
+version = loadAlgitesVersions()["repository.version"] ?: "0.0.0-LOCAL"
 
 // -----------------------------
 // Versions / filtering
@@ -43,11 +43,11 @@ fun filterTemplate(text: String, versions: Map<String, String>): String {
         versions[key] ?: error("Missing token value for @$key@ in versions file.")
     }
 
-    // Replace @version:<groupId>:<artifactId>@ tokens (mapped to key 'version:<groupId>:<artifactId>')
-    out = out.replace(Regex("@version:([^@]+?)@")) { m ->
+    // Replace @version_<groupId>:<artifactId>@ tokens (mapped to key 'version_<groupId>:<artifactId>')
+    out = out.replace(Regex("@version_([^@]+?)@")) { m ->
         val gav = m.groupValues[1]
-        val key = "version:$gav"
-        versions[key] ?: error("Missing version mapping for @$key@ (used as @version:$gav@).")
+        val key = "version_$gav"
+        versions[key] ?: error("Missing version mapping for @$key@ (used as @version_$gav@).")
     }
 
     return out
