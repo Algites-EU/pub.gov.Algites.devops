@@ -90,7 +90,7 @@ public final class AIcPolicyArtifactManager {
 
 	private static void validate(Path aArtifactRoot, Path aPolicyFile, Path aRepositoryRoot, Path aRepositoryFile) throws IOException {
 		AIcPolicyModel locPolicyModel = AIcPolicyModel.load(aPolicyFile);
-		System.out.println("DEBUG: Loaded content of the policy file:\n" + locPolicyModel.values + "\n---");
+		System.out.println("INFO: Loaded content of the policy file:\n" + locPolicyModel.values + "\n---");
 
 		// Required template files for a policy artifact
 		Path mavenTpl = aArtifactRoot.resolve(SRC_PRODUCT_MAVEN_POM_XML_TPL);
@@ -118,7 +118,7 @@ public final class AIcPolicyArtifactManager {
 		System.out.println("OK: policy artifact inputs validated.");
 
 		AIcRepositoryModel locRepositoryModel = AIcRepositoryModel.load(aRepositoryFile);
-		System.out.println("DEBUG: Loaded content of the repository file:\n" + locRepositoryModel.values + "\n---");
+		System.out.println("INFO: Loaded content of the repository file:\n" + locRepositoryModel.values + "\n---");
 		requiredKeys = List.of(
 				ALGITES_REPOSITORY_LANE,
 				ALGITES_REPOSITORY_LANE_REVISION,

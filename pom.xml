@@ -25,10 +25,10 @@
 	  Modules
 	  Only aggregation – no inheritance implied.
 	-->
-	<modules>
-		<module>build/policy/base</module>
-		<module>build/policy/polarman</module>
-	</modules>
+<!--	<modules>-->
+<!--		<module>build/policy/base</module>-->
+<!--		<module>build/policy/polarman</module>-->
+<!--	</modules>-->
 
 	<!--
 	  Absolutely minimal configuration on purpose.

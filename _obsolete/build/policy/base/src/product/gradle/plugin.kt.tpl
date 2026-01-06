@@ -10,9 +10,7 @@ import org.gradle.api.Project
  */
 // @TODO - class from this one, also Id here and then have static list of all policies applied, where the descendat will register own lopicy, this will verify the policy id
 object AIoAlgitesBuildBasePublicPolicy {
-
-    const val VERSION =
-        "@algites.policy.version@";;;
+    const val VERSION = "@algites.policy.version@";
 }
 
 protected data class AIdAlgitesPropertiesFile(
@@ -42,9 +40,9 @@ class AIcAlgitesBuildBasePublicPlugin : Plugin<Project> {
         registerAggregatedTasks(this)
         // Register repositories
         registerRepositories(this)
-    }
+    };
 
-	protected open registerRepositories(project: Project) {
+	protected open fun registerRepositories(project: Project) {
         // Common repositories (PUBLIC baseline)
         project.repositories.apply {
             // Releases

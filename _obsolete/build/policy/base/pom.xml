@@ -14,6 +14,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<algites.repository.kind>public</algites.repository.kind>
+		<gradle.version>9.2.1</gradle.version>
 	</properties>
 
 	<build>
@@ -189,6 +190,18 @@
 							<failIfNoMatch>true</failIfNoMatch>
 						</configuration>
 					</execution>
+					<execution>
+						<id>add-generated-kotlin-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources/gradle</source>
+							</sources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
@@ -288,7 +301,7 @@
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
-				<version>1.9.0</version>  <!-- use the appropriate Kotlin version -->
+				<version>2.3.0</version>  <!-- use the appropriate Kotlin version -->
 				<executions>
 					<execution>
 						<id>compile-kotlin-plugin</id>
@@ -297,8 +310,9 @@
 						<configuration>
 							<!-- Include the filtered source file directory: -->
 							<sourceDirs>
-								<sourceDir>${project.build.directory}/generated-sources/kotlin</sourceDir>
+								<sourceDir>${project.build.directory}/generated-sources/gradle</sourceDir>
 							</sourceDirs>
+							<output>${project.build.directory}/generated-binaries/gradle</output>
 						</configuration>
 					</execution>
 				</executions>
@@ -311,6 +325,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.3.0</version>
@@ -324,45 +339,42 @@
 							<includes>
 								<include>eu/algites/tool/build/**</include>  <!-- your plugin classes -->
 							</includes>
+							<classesDirectory>${project.build.directory}/generated-binaries/gradle</classesDirectory>
+							<outputDirectory>${project.build.directory}</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
-<!--
-			&lt;!&ndash; Attach generated POM as the project artifact &ndash;&gt;
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.5.0</version>
-				<executions>
-					<execution>
-						<id>attach-parent-pom</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attach-artifact</goal>
-						</goals>
-						<configuration>
-							<artifacts>
-								<artifact>
-									<file>${project.build.directory}/pom.xml.tpl</file>
-									<type>pom</type>
-								</artifact>
-							</artifacts>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
--->
 		</plugins>
 
 	</build>
 
+	<dependencyManagement>
+		<dependencies>
+<!--
+			<dependency>
+				<groupId>org.gradle</groupId>
+				<artifactId>gradle-bom</artifactId>
+				<version>${gradle.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+-->
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.gradle</groupId>
+			<artifactId>gradle-tooling-api</artifactId>
+			<version>${gradle.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>eu.algites.tool.build</groupId>
 			<artifactId>pub.gov.Algites.devops_build.policy.polarman</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
