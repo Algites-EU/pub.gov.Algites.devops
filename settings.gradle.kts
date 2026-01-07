@@ -39,6 +39,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "pub.gov.Algitest"
+rootProject.name = "pub.gov.Algites"
 include(":devops:build:model:common")
 include(":devops:build:policy:base")

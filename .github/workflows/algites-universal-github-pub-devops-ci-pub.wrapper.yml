@@ -23,7 +23,7 @@ on:
 
 jobs:
   ci:
-    # Base reusable workflow lives in THIS repository (pub.gov.Algites.devops)
+    # Base reusable workflow lives in THIS repository (pub.gov.Algites)
     uses: ./.github/workflows/algites-universal-github-pub-devops-ci.yml
     with:
       build-tool: ${{ inputs.build-tool }}

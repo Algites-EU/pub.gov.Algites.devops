@@ -25,7 +25,7 @@ on:
 jobs:
   ci:
     # Base reusable workflow lives in the PUBLIC DevOps repo
-    uses: Algites-EU/pub.gov.Algites.devops/.github/workflows/algites-universal-github-pub-devops-ci.yml@main
+    uses: Algites-EU/pub.gov.Algites/.github/workflows/algites-universal-github-pub-devops-ci.yml@main
     with:
       build-tool: ${{ inputs.build-tool }}
       java-version_ ${{ inputs.java-version }}
