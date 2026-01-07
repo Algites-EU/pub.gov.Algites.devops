@@ -1,2 +1,2 @@
-# pub.gov.Algites.devops
-Public Algites Governance repository used for the publicly accessible devops sources. 
+# pub.gov.Algites
+Public Algites Governance repository used for the publicly accessible resources, used for specifications, common devops hadnlings, etc.. 
