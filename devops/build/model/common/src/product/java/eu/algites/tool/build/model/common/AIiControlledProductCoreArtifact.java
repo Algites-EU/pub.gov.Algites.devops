@@ -20,7 +20,7 @@ import static eu.algites.tool.build.model.common.AInArtifactKind.PRODUCT_CORE;
  * @date 07.01.26 14:07
  */
 public interface AIiControlledProductCoreArtifact extends AIiControlledArtifact,
-		AIiDirectDependencies, AIiParentContainer<AIiControlledPolicyArtifact> {
+		AIiDirectDependencies<AIiAbstractArtifact>, AIiParentContainer<AIiControlledPolicyArtifact> {
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#PRODUCT_CORE}

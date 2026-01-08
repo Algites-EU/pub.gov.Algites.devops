@@ -5,7 +5,8 @@ package eu.algites.tool.build.model.common;
  * Title: {@link AIiArtifactProjection}
  * </p>
  * <p>
- * Description: Gets the definition of the artifact output
+ * Description: Gets the definition of the artifact projection,
+ * defining which projection should be used in the used context.
  * </p>
  * <p>
  * Copyright: Copyright (c) 2026 Artur Linhart, Algites

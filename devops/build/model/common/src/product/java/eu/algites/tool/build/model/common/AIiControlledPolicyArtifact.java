@@ -20,7 +20,7 @@ import static eu.algites.tool.build.model.common.AInArtifactKind.POLICY;
  * @date 07.01.26 14:07
  */
 public interface AIiControlledPolicyArtifact extends AIiControlledArtifact, AIiPolicyBackgroundDependenciesManager,
-		AIiDirectDependencies, AIiParentContainer<AIiAbstractArtifact> {
+		AIiDirectDependencies<AIiAbstractArtifact>, AIiParentContainer<AIiAbstractArtifact> {
 
 	/**
 	 * Gets the Unique Id of the policy in the tree of the inherintance of the policies.

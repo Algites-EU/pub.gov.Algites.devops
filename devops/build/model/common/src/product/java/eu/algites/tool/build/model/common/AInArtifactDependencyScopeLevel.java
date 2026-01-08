@@ -6,6 +6,8 @@ import static eu.algites.tool.build.model.common.AInArtifactKind.PRODUCT_CORE;
 import static eu.algites.tool.build.model.common.AInArtifactKind.PRODUCT_INTERFACE_BOM;
 import static eu.algites.tool.build.model.common.AInArtifactKind.PRODUCT_VARIANT_BOM;
 import static eu.algites.tool.build.model.common.AInArtifactKind.TEST_CORE;
+import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED_BOM;
+import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED_CORE;
 
 import java.util.List;
 
@@ -28,11 +30,12 @@ import java.util.List;
  */
 public enum AInArtifactDependencyScopeLevel {
 
-	COMPILE(false, POLICY, PRODUCT_CORE, TEST_CORE),
-	TEST(false, POLICY, PRODUCT_CORE, TEST_CORE),
-	RUNTIME(false, POLICY, PRODUCT_CORE, TEST_CORE),
-	PROVIDED(false, POLICY, PRODUCT_CORE, TEST_CORE),
-	IMPORT(true, POLICY_BACKGROUND_BOM, PRODUCT_INTERFACE_BOM, PRODUCT_VARIANT_BOM
+	UNDEFINED(true, UNCONTROLLED_CORE, POLICY, PRODUCT_CORE, TEST_CORE),
+	COMPILE(false, UNCONTROLLED_CORE, POLICY, PRODUCT_CORE, TEST_CORE),
+	TEST(false, UNCONTROLLED_CORE, POLICY, PRODUCT_CORE, TEST_CORE),
+	RUNTIME(false, UNCONTROLLED_CORE, POLICY, PRODUCT_CORE, TEST_CORE),
+	PROVIDED(false, UNCONTROLLED_CORE, POLICY, PRODUCT_CORE, TEST_CORE),
+	IMPORT(true, UNCONTROLLED_BOM, POLICY_BACKGROUND_BOM, PRODUCT_INTERFACE_BOM, PRODUCT_VARIANT_BOM
 	),
 	;
 

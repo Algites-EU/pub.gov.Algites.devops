@@ -22,9 +22,16 @@ public enum AInArtifactKind {
 
 
 	/**
-	 * General product artifact intended to be productively used somewhere
+	 * General product artifact non-BOM intended to be productively used somewhere,
+	 * external dependency (jar/…)
 	 */
-	UNCONTROLLED("(unknown)", false, false, false),
+	UNCONTROLLED_CORE("(unknown core)", false, false, false),
+
+	/**
+	 * General product artifact non-BOM intended to be productively used somewhere,
+	 * external POM used for import only / may represent BOM
+	 */
+	UNCONTROLLED_BOM("(unknown BOM)", false, false, true),
 
 	/**
 	 * General product artifact intended to be productively used somewhere

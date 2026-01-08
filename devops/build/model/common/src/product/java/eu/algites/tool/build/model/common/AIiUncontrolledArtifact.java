@@ -1,13 +1,13 @@
 package eu.algites.tool.build.model.common;
 
-import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED;
+import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED_CORE;
 
 /**
  * <p>
  * Title: {@link AIiUncontrolledArtifact}
  * </p>
  * <p>
- * Description: Basic interface for the Algites Unknown Artifacts
+ * Description: Basic Marker interface for the Algites Uncontrolled Artifacts
  * </p>
  * <p>
  * Copyright: Copyright (c) 2026 Artur Linhart, Algites
@@ -20,13 +20,6 @@ import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED;
  * @date 07.01.26 14:07
  */
 public interface AIiUncontrolledArtifact extends AIiAbstractArtifact {
-
-	/**
-	 * Gets the kind of the artifact {@link AInArtifactKind#UNCONTROLLED}
-	 * @return the kind of the artifact
-	 */
-	@Override
-	default AInArtifactKind getArtifactKind() { return UNCONTROLLED; }
 
 	/**
 	 * Gets the version of the artifact

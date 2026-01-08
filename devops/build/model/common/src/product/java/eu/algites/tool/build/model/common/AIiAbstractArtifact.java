@@ -1,7 +1,5 @@
 package eu.algites.tool.build.model.common;
 
-import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED;
-
 /**
  * <p>
  * Title: {@link AIiAbstractArtifact}

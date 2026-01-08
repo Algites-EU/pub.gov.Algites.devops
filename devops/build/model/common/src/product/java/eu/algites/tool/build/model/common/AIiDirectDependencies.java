@@ -26,6 +26,6 @@ public interface AIiDirectDependencies<T extends AIiAbstractArtifact> {
 	 * transitive dependencies applied to the artifact or its children.
 	 * @return the dependencies of the artifact
 	 */
-	List<AIiArtifactDependency<? extends T>> getDependencies();
+	List<AIiArtifactDependency<? extends T>> getDirectDependencies();
 
 }
