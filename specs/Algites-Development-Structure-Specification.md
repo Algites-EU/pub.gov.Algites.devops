@@ -552,7 +552,7 @@ This section standardizes Algites BOM terminology, responsibilities, generation 
 
 > **Key principle:** A “BOM” is not one thing. In Algites we distinguish three BOM categories with different semantics and lifecycle:
 >
-> - **Product Background BOM (PBBOM)** — generated, hierarchical, background version alignment for *framework-independent* external components used by the product.
+> - **Policy Background BOM (PBBOM)** — generated, hierarchical, background version alignment for *framework-independent* external components forced by the product policy.
 > - **Product Interface BOM (PIBOM)** — curated, library/product catalog of the product’s own modules.
 > - **Product Variant BOM (PVBOM)** — curated, opinionated platform/stack BOM combining multiple options into one specific product variant.
 
@@ -592,11 +592,11 @@ Maven semantics impose important constraints:
 
 ##### 3.1.5.2 BOM categories (Algites standard)
 
-###### 3.1.5.2.1 Product Background BOM (PBBOM)
+###### 3.1.5.2.1 Policy Background BOM (PBBOM)
 
 #### Purpose
 
-The **Product Background BOM (PBBOM)** provides a **shared version background** for components that must remain *framework-independent* (e.g., plugins, adapters, generic interfaces), yet must be developed against a consistent ecosystem background to avoid classpath conflicts when later integrated into a product/framework runtime.
+The **Policy Background BOM (PBBOM)** provides a **shared version background** for components that must remain *framework-independent* (e.g., plugins, adapters, generic interfaces), yet must be developed against a consistent ecosystem background to avoid classpath conflicts when later integrated into a product/framework runtime.
 
 Typical use-case:
 
@@ -823,8 +823,8 @@ Maven permits importing any POM via `<scope>import</scope>` and will effectively
 
 - PBBOM artifacts **MUST** be generated from Policy Artifacts.
 - PBBOM generation is deterministic:
-  - inputs: `algites-policy-artifact.properties` + templates
-  - outputs: `pbbom.pom` (and optionally metadata)
+  - inputs: `algites-artifact.properties` 
+  - outputs: `*-pbbom.pom` (and optionally metadata)
 - If policy `Y` inherits from policy `X`:
   - `PBBOM-Y` **MUST import** `PBBOM-X`.
 
@@ -930,7 +930,7 @@ Version definitions:
 
 ```mermaid
 flowchart LR
-    SRC[algites-policy-artifact.properties]
+    SRC[algites-artifact.properties]
     SRC --> POL2[Policy Artifact]
     POL2 --> MVN[Maven Build]
     POL2 --> GRD[Gradle Build]
@@ -967,19 +967,19 @@ Policy artifacts are a distinct class of artifacts whose sole purpose is to defi
 A policy artifact is **explicitly identified** by the presence of the marker file:
 
 ```
-algites-policy-artifact.properties
+algites-artifact.properties
 ```
 
 The existence of this file alone classifies the repository as a *policy artifact*. No additional metadata is required to identify the artifact type.
 
-###### 3.2.6.3.2 Role of algites-policy-artifact.properties
+###### 3.2.6.3.2 Role of algites-artifact.properties
 
-The file `algites-policy-artifact.properties` serves a dual purpose:
+The file `algites-artifact.properties` serves a dual purpose:
 
 1. **Marker** – identifies the repository as a policy artifact
 2. **Data source** – defines all version and policy-related properties used during generation
 
-Policy artifacts must not use `algites-versions.properties`. Product artifacts must not contain `algites-policy-artifact.properties`.
+Policy artifacts must not use `algites-versions.properties`. Product artifacts must not contain `algites-artifact.properties`.
 
 ---
 
@@ -989,7 +989,7 @@ All policy artifacts MUST follow a strictly standardized internal structure.
 
 ```
 /
-├─ algites-policy-artifact.properties
+├─ algites-artifact.properties
 ├─ build.gradle.kts
 ├─ pom.xml
 └─ src/
@@ -1001,7 +1001,7 @@ All policy artifacts MUST follow a strictly standardized internal structure.
 
 All build logic (`build.gradle.kts`, generation tasks, CI expectations) is identical across policy artifacts. Only the following may differ:
 
-- Contents of `algites-policy-artifact.properties`
+- Contents of `algites-artifact.properties`
 - Contents of template files
 - GroupId / ArtifactId / Version of the policy artifact itself
 

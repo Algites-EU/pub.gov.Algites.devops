@@ -144,7 +144,7 @@ jobs:
           fi
 
           if [[ ! "$REPO_LANE" =~ ^([0-9]+)\.([0-9]+)\.x$ ]]; then
-            echo "::error::repo.lane must be <A>.<B>.x (e.g. 1.1.x). Got: '$REPO_LANE'."
+            echo "::error::repo.lane must be <A>.<B>.x (e.g. 1.1). Got: '$REPO_LANE'."
             exit 1
           fi
 

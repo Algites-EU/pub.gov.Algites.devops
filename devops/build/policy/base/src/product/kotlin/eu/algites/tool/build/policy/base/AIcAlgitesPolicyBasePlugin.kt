@@ -74,7 +74,7 @@ class AIcAlgitesPolicyBasePlugin : Plugin<Project> {
             listOf("src/product/java", "src/product/javagen", "src/product/javaextgen", "src/product/kotlin")
         )
         sourceSets.getByName("main").resources.setSrcDirs(
-            listOf("src/product/resources", "src/product/config", "src/product/configgen", "src/product/configextgen")
+            listOf("src/product/resources", "src/product/config", "src/product/configgen", "src/product/configextgen","src/product/yaml")
         )
 
         // test -> develop
@@ -82,7 +82,7 @@ class AIcAlgitesPolicyBasePlugin : Plugin<Project> {
             listOf("src/develop/java","src/develop/javagen", "src/develop/javaextgen", "src/develop/kotlin")
         )
         sourceSets.getByName("test").resources.setSrcDirs(
-            listOf("src/develop/resources", "src/product/config", "src/product/configgen", "src/product/configextgen")
+            listOf("src/develop/resources", "src/develop/config", "src/develop/configgen", "src/develop/configextgen","src/develop/yaml")
         )
     }
 }

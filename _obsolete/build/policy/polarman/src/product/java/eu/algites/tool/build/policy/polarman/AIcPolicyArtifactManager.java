@@ -49,7 +49,7 @@ public final class AIcPolicyArtifactManager {
 		Map<String, String> opts = parseOpts(Arrays.copyOfRange(args, 1, args.length));
 
 		Path root = Path.of(opts.getOrDefault("--root", ".")).normalize();
-		Path policyFile = root.resolve(opts.getOrDefault("--policy-file", "algites-policy-artifact.properties"));
+		Path policyFile = root.resolve(opts.getOrDefault("--policy-file", "algites-artifact.properties"));
 		final String locRepositoryFileName = opts.getOrDefault("--repository-file", "algites-repository.properties");
 		Path repositoryRoot = AIsPolicyArtifactManagerUtils.findRepositoryRoot(root, locRepositoryFileName);
 		Path repositoryFile = repositoryRoot.resolve(locRepositoryFileName);
@@ -70,8 +70,8 @@ public final class AIcPolicyArtifactManager {
 	private static void usage() {
 		System.out.println("""
             algites-policy-gen
-              generate --root . [--policy-file algites-policy-artifact.properties] [--repository-file algites-repository.properties] [--out run/gen]
-              validate --root . [--policy-file algites-policy-artifact.properties] [--repository-file algites-repository.properties]
+              generate --root . [--policy-file algites-artifact.properties] [--repository-file algites-repository.properties] [--out run/gen]
+              validate --root . [--policy-file algites-artifact.properties] [--repository-file algites-repository.properties]
               scaffold --dir <path_inside_repository> --AlgitesPolicyArtifactGroupId <gid> --AlgitesPolicyArtifactArtifactIdBase <aid> --AlgitesPolicyId <id> --AlgitesPolicyVersion <ver> [--repository-file algites-repository.properties]
             """);
 	}
@@ -176,7 +176,7 @@ public final class AIcPolicyArtifactManager {
 		Files.createDirectories(dir);
 
 		// Marker + data
-		Path policyProps = dir.resolve("algites-policy-artifact.properties");
+		Path policyProps = dir.resolve("algites-artifact.properties");
 		if (!Files.exists(policyProps)) {
 			String content = """
                 # Algites policy artifact marker + data

@@ -21,7 +21,7 @@
 		<directory>${project.basedir}/run/bld/maven</directory>
 
 		<filters>
-			<filter>algites-policy-artifact.properties</filter>
+			<filter>algites-artifact.properties</filter>
 		</filters>
 
 

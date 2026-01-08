@@ -2,11 +2,11 @@ java {
     sourceSets {
         val main by getting {
             java.setSrcDirs(listOf("src/product/java", "src/product/kotlin"))
-            resources.setSrcDirs(listOf("src/product/resources"))
+            resources.setSrcDirs(listOf("src/product/resources","src/product/yaml"))
         }
         val test by getting {
             java.setSrcDirs(listOf("src/develop/java", "src/develop/kotlin"))
-            resources.setSrcDirs(listOf("src/develop/resources"))
+            resources.setSrcDirs(listOf("src/develop/resources","src/develop/yaml"))
         }
     }
 }
