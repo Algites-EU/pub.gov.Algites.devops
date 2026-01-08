@@ -23,9 +23,12 @@ public interface AIiUncontrolledCoreArtifact extends AIiUncontrolledArtifact {
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#UNCONTROLLED_CORE}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return UNCONTROLLED_CORE; }
+	default AInArtifactKind getArtifactKind() {
+		return UNCONTROLLED_CORE;
+	}
 
 }

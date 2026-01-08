@@ -24,8 +24,11 @@ public interface AIiControlledProductCoreArtifact extends AIiControlledArtifact,
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#PRODUCT_CORE}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return PRODUCT_CORE; }
+	default AInArtifactKind getArtifactKind() {
+		return PRODUCT_CORE;
+	}
 }

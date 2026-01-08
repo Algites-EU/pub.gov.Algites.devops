@@ -21,12 +21,14 @@ public interface AIiVersionQualifier {
 
 	/**
 	 * Gets the kind of the qualifier
+	 *
 	 * @return the kind of the qualifier
 	 */
 	AInVersionQualifierKind getKind();
 
 	/**
 	 * Gets the label of the qualifier
+	 *
 	 * @return the label of the qualifier
 	 */
 	String getLabel();

@@ -23,6 +23,7 @@ public interface AIiProductVariantDependenciesManager extends AIiManagedDependen
 
 	/**
 	 * Gets the managed product variant uncotrolled dependencies
+	 *
 	 * @return the managed product variant uncotrolled dependencies
 	 */
 	List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> getManagedProductVariantDependencies();

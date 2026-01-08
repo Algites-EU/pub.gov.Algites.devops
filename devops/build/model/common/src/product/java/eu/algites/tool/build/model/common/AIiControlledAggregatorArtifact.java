@@ -25,14 +25,18 @@ public interface AIiControlledAggregatorArtifact extends AIiControlledArtifact {
 
 	/**
 	 * Gets the contained artifacts
+	 *
 	 * @return the contained artifacts
 	 */
 	List<AIiControlledArtifact> getContainedArtifacts();
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#AGGREGATOR}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return AGGREGATOR; }
+	default AInArtifactKind getArtifactKind() {
+		return AGGREGATOR;
+	}
 }

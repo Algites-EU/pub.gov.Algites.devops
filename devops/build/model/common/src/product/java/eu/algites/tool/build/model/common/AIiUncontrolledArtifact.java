@@ -1,7 +1,5 @@
 package eu.algites.tool.build.model.common;
 
-import static eu.algites.tool.build.model.common.AInArtifactKind.UNCONTROLLED_CORE;
-
 /**
  * <p>
  * Title: {@link AIiUncontrolledArtifact}
@@ -23,6 +21,7 @@ public interface AIiUncontrolledArtifact extends AIiAbstractArtifact {
 
 	/**
 	 * Gets the version of the artifact
+	 *
 	 * @return the version of the artifact
 	 */
 	String getArtifactVersion();

@@ -21,6 +21,7 @@ public interface AIiControlledArtifact extends AIiAbstractArtifact {
 
 	/**
 	 * Gets the version context of the known artifact
+	 *
 	 * @return the version context of the known artifact
 	 */
 	AIiVersionContext getVersionContext();

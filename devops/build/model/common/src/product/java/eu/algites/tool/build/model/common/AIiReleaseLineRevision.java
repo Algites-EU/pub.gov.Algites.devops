@@ -21,6 +21,7 @@ public interface AIiReleaseLineRevision {
 
 	/**
 	 * Gets the revision number
+	 *
 	 * @return the revision number
 	 */
 	int getNumber();

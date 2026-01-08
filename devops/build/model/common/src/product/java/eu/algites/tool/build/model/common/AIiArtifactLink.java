@@ -5,8 +5,7 @@ package eu.algites.tool.build.model.common;
  * Title: {@link AIiArtifactLink}
  * </p>
  * <p>
- * Description: Gets the abstraction of the link of the artifact,
- * which is intended to be used as a target for dependency-like relations
+ * Description: Gets the abstraction of the link of the artifact, which is intended to be used as a target for dependency-like relations
  * </p>
  * <p>
  * Copyright: Copyright (c) 2026 Artur Linhart, Algites
@@ -22,6 +21,7 @@ public interface AIiArtifactLink<A extends AIiAbstractArtifact> {
 
 	/**
 	 * Gets the linked artifact
+	 *
 	 * @return the linked artifact
 	 */
 	A getLinkedArtifact();

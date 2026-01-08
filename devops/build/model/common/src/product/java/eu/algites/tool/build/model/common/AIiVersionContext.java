@@ -21,18 +21,21 @@ public interface AIiVersionContext {
 
 	/**
 	 * Gets the basic release line of the version context. Can be null if no release context is specified
+	 *
 	 * @return the basic release line of the version context
 	 */
 	AIiReleaseLine getReleaseLine();
 
 	/**
 	 * Gets the revision of the version context.
+	 *
 	 * @return the revision of the version context
 	 */
 	AIiReleaseLineRevision getRevision();
 
 	/**
 	 * Gets the qualifier of the version context. Must be always specified.
+	 *
 	 * @return the qualifier of the version context
 	 */
 	AIiVersionQualifier getQualifier();

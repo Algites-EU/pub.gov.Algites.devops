@@ -27,18 +27,20 @@ public interface AIiControlledProductInterfaceBomArtifact extends AIiControlledA
 
 	/**
 	 * Gets the referenced product background BOM artifact, if assigned
+	 *
 	 * @return the referenced product background BOM artifact, if assigned
 	 */
 	AIiControlledPolicyBackgroundBomArtifact getPolicyBackgroundBom();
 
-
-	@SuppressWarnings( "unchecked")
+	@SuppressWarnings("unchecked")
 	default List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedDependencies() {
 		List<AIiArtifactDependency<? extends AIiAbstractArtifact>> locResult = null;
 		if (getPolicyBackgroundBom() != null)
 			locResult = getPolicyBackgroundBom().getManagedDependencies();
-		if (locResult == null) return (List)getManagedInterfaceDependencies();
-		if (getManagedInterfaceDependencies() == null) return locResult;
+		if (locResult == null)
+			return (List) getManagedInterfaceDependencies();
+		if (getManagedInterfaceDependencies() == null)
+			return locResult;
 
 		locResult = new ArrayList<>(locResult);
 		locResult.addAll(getManagedInterfaceDependencies());
@@ -47,8 +49,11 @@ public interface AIiControlledProductInterfaceBomArtifact extends AIiControlledA
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#PRODUCT_INTERFACE_BOM}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return PRODUCT_INTERFACE_BOM; }
+	default AInArtifactKind getArtifactKind() {
+		return PRODUCT_INTERFACE_BOM;
+	}
 }

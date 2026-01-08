@@ -23,6 +23,7 @@ public interface AIiProductInterfaceDependenciesManager extends AIiManagedDepend
 
 	/**
 	 * Gets the managed background dependencies
+	 *
 	 * @return the managed background dependencies
 	 */
 	List<AIiArtifactDependency<? extends AIiControlledArtifact>> getManagedInterfaceDependencies();

@@ -21,21 +21,22 @@ public interface AIiAbstractArtifact {
 
 	/**
 	 * Gets the group Id of the artifact
+	 *
 	 * @return the group Id of the artifact
 	 */
 	String getArtifactGroupId();
 
 	/**
-	 * Gets the artifact Id base of the artifact. The Id Base denotes
-	 * the Artifact Id and in the case some sub-artifacts
-	 * for the given artifact are generated,
-	 * to this string can be appended some extra extension, like "-pom"
+	 * Gets the artifact Id base of the artifact. The Id Base denotes the Artifact Id and in the case some sub-artifacts for the given
+	 * artifact are generated, to this string can be appended some extra extension, like "-pom"
+	 *
 	 * @return the artifact Id base of the artifact
 	 */
 	String getArtifactIdBase();
 
 	/**
 	 * Gets the kind of the artifact
+	 *
 	 * @return the kind of the artifact.
 	 */
 	AInArtifactKind getArtifactKind();

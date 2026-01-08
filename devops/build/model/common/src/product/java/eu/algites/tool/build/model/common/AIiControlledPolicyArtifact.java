@@ -23,24 +23,27 @@ public interface AIiControlledPolicyArtifact extends AIiControlledArtifact, AIiP
 		AIiDirectDependencies<AIiAbstractArtifact>, AIiParentContainer<AIiAbstractArtifact> {
 
 	/**
-	 * Gets the Unique Id of the policy in the tree of the inherintance of the policies.
-	 * The Uid must be usable as the valid XML element (used in POM-files
-	 * for the generation of the property element, where the value
-	 * is given by {@link #getPolicyDefinitionVersion()})
+	 * Gets the Unique Id of the policy in the tree of the inherintance of the policies. The Uid must be usable as the valid XML element (used
+	 * in POM-files for the generation of the property element, where the value is given by {@link #getPolicyDefinitionVersion()})
+	 *
 	 * @return the Unique Id of the policy in the hierarchy of the policy inheritance
 	 */
 	String getPolicyDefinitionUid();
 
 	/**
 	 * Gets the version of the policy
+	 *
 	 * @return the version of the policy
 	 */
 	String getPolicyDefinitionVersion();
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#POLICY}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return POLICY; }
+	default AInArtifactKind getArtifactKind() {
+		return POLICY;
+	}
 }

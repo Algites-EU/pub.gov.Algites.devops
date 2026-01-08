@@ -22,8 +22,8 @@ import java.util.List;
 public interface AIiDirectDependencies<T extends AIiAbstractArtifact> {
 
 	/**
-	 * gets the dependencies of the artifact. Dependencies mean the dírectly
-	 * transitive dependencies applied to the artifact or its children.
+	 * gets the dependencies of the artifact. Dependencies mean the dírectly transitive dependencies applied to the artifact or its children.
+	 *
 	 * @return the dependencies of the artifact
 	 */
 	List<AIiArtifactDependency<? extends T>> getDirectDependencies();

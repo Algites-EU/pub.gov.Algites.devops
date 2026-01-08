@@ -23,9 +23,12 @@ public interface AIiUncontrolledBomArtifact extends AIiUncontrolledArtifact {
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#UNCONTROLLED_BOM}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return UNCONTROLLED_BOM; }
+	default AInArtifactKind getArtifactKind() {
+		return UNCONTROLLED_BOM;
+	}
 
 }

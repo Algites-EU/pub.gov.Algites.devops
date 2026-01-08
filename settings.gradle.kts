@@ -4,7 +4,7 @@ pluginManagement {
         mavenCentral()
         maven {
             name = "algites-public-releases"
-            url = uri("https://repo.maven.apache.org/maven2")
+            url = uri("https://repo1.maven.org/maven2")
             mavenContent {
                 releasesOnly()
             }
@@ -24,7 +24,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             name = "algites-public-releases"
-            url = uri("https://repo.maven.apache.org/maven2")
+            url = uri("https://repo1.maven.org/maven2")
             mavenContent {
                 releasesOnly()
             }

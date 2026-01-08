@@ -23,12 +23,14 @@ public interface AIiArtifactDependency<A extends AIiAbstractArtifact> extends AI
 
 	/**
 	 * Gets the dependency exclusions
+	 *
 	 * @return the dependency exclusions
 	 */
 	List<AIiArtifactProjection<? extends AIiAbstractArtifact>> getDependencyExclusions();
 
 	/**
 	 * Gets the dependency scope
+	 *
 	 * @return the dependency scope
 	 */
 	AIiArtifactDependencyScope getDependencyScope();

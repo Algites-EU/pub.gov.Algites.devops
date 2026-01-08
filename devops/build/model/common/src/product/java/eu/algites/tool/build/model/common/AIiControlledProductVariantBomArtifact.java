@@ -22,21 +22,25 @@ import java.util.List;
  * @author linhart1
  * @date 07.01.26 14:07
  */
-public interface AIiControlledProductVariantBomArtifact extends AIiControlledArtifact, AIiProductVariantDependenciesManager, AIiParentContainer<AIiControlledPolicyArtifact> {
+public interface AIiControlledProductVariantBomArtifact
+		extends AIiControlledArtifact, AIiProductVariantDependenciesManager, AIiParentContainer<AIiControlledPolicyArtifact> {
 
 	/**
 	 * Gets the referenced product background BOM artifact, if assigned
+	 *
 	 * @return the referenced product background BOM artifact, if assigned
 	 */
 	AIiControlledProductInterfaceBomArtifact getProductInterfaceBom();
 
-	@SuppressWarnings( "unchecked")
+	@SuppressWarnings("unchecked")
 	default List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedDependencies() {
 		List<AIiArtifactDependency<? extends AIiAbstractArtifact>> locResult = null;
 		if (getProductInterfaceBom() != null)
 			locResult = getProductInterfaceBom().getManagedDependencies();
-		if (locResult == null) return (List) getManagedProductVariantDependencies();
-		if (getManagedProductVariantDependencies() == null) return locResult;
+		if (locResult == null)
+			return (List) getManagedProductVariantDependencies();
+		if (getManagedProductVariantDependencies() == null)
+			return locResult;
 
 		locResult = new ArrayList<>(locResult);
 		locResult.addAll(getManagedProductVariantDependencies());
@@ -45,8 +49,11 @@ public interface AIiControlledProductVariantBomArtifact extends AIiControlledArt
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#PRODUCT_VARIANT_BOM}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return PRODUCT_VARIANT_BOM; }
+	default AInArtifactKind getArtifactKind() {
+		return PRODUCT_VARIANT_BOM;
+	}
 }

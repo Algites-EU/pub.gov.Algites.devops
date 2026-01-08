@@ -27,13 +27,16 @@ public interface AIiControlledPolicyBackgroundBomArtifact extends
 	@Override
 	@SuppressWarnings("unchecked")
 	default List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedDependencies() {
-		return (List) getManagedPolicyBackgroundDependencies();
+		return getManagedPolicyBackgroundDependencies();
 	}
 
 	/**
 	 * Gets the kind of the artifact {@link AInArtifactKind#POLICY_BACKGROUND_BOM}
+	 *
 	 * @return the kind of the artifact
 	 */
 	@Override
-	default AInArtifactKind getArtifactKind() { return POLICY_BACKGROUND_BOM; }
+	default AInArtifactKind getArtifactKind() {
+		return POLICY_BACKGROUND_BOM;
+	}
 }

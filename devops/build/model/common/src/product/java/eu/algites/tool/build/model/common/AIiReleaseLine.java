@@ -21,6 +21,7 @@ public interface AIiReleaseLine {
 
 	/**
 	 * Gets the lane version
+	 *
 	 * @return the lane version
 	 */
 	String getLaneVersion();

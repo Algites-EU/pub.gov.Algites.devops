@@ -21,6 +21,7 @@ public interface AIiParentContainer<A extends AIiAbstractArtifact> {
 
 	/**
 	 * Gets the parent of the artifact
+	 *
 	 * @return the parent of the artifact
 	 */
 	A getParent();

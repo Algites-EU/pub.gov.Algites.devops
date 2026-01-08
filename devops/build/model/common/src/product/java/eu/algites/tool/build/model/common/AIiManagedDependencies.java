@@ -22,8 +22,9 @@ import java.util.List;
 public interface AIiManagedDependencies {
 
 	/**
-	 * Gets the managed dependencies of possible various types. If the manager
-	 * contains reference to other managers, then also such dependencies are returned here.
+	 * Gets the managed dependencies of possible various types. If the manager contains reference to other managers, then also such
+	 * dependencies are returned here.
+	 *
 	 * @return all managed dependencies of the manager
 	 */
 	List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedDependencies();

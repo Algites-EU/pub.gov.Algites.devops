@@ -367,7 +367,7 @@ These functions are intentionally simple and declarative.
 fun RepositoryHandler.algitesPublicRepositories() {
      maven {
         name = "algites-public-releases"
-        url = uri("https://repo.maven.apache.org/maven2")
+        url = uri("https://repo1.maven.org/maven2")
         mavenContent {
             releasesOnly()
         }

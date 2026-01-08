@@ -42,14 +42,16 @@ public enum AInArtifactDependencyScopeLevel {
 	private final List<AInArtifactKind> allowedForUsageWithArtifactKinds;
 	private final boolean usedForManagedDependenciesOnly;
 
-	AInArtifactDependencyScopeLevel(final boolean aUsedForManagedDependenciesOnly, final AInArtifactKind... aAllowedForUsageWithArtifactKinds) {
+	AInArtifactDependencyScopeLevel(
+			final boolean aUsedForManagedDependenciesOnly,
+			final AInArtifactKind... aAllowedForUsageWithArtifactKinds) {
 		allowedForUsageWithArtifactKinds = List.of(aAllowedForUsageWithArtifactKinds);
 		usedForManagedDependenciesOnly = aUsedForManagedDependenciesOnly;
 	}
 
 	/**
-	 * Gets the list of the artifact kinds, with whcih the given scope level can be used
-	 * in the defined dependency.
+	 * Gets the list of the artifact kinds, with whcih the given scope level can be used in the defined dependency.
+	 *
 	 * @return the allowedArtifactKinds
 	 */
 	public List<AInArtifactKind> getAllowedForUsageInDependencyWithArtifactKinds() {
@@ -57,8 +59,8 @@ public enum AInArtifactDependencyScopeLevel {
 	}
 
 	/**
-	 * Defines the scope level can be used only in the definition of the managed dependencies,
-	 * not in direct dependencies.
+	 * Defines the scope level can be used only in the definition of the managed dependencies, not in direct dependencies.
+	 *
 	 * @return the managedOnly flag for the scope level.
 	 */
 	public boolean isUsedForManagedDependenciesOnly() {

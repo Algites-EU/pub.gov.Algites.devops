@@ -58,7 +58,7 @@
 		<!-- Maven Central (releases) -->
 		<repository>
 			<id>central</id>
-			<url>https://repo.maven.apache.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -84,7 +84,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>central</id>
-			<url>https://repo.maven.apache.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

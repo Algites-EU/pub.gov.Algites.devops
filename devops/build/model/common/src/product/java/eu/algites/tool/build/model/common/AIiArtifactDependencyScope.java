@@ -21,12 +21,14 @@ public interface AIiArtifactDependencyScope {
 
 	/**
 	 * Gets the scope level
+	 *
 	 * @return the scope level
 	 */
 	AInArtifactDependencyScopeLevel getLevel();
 
 	/**
 	 * Gets the dependency scope behavior
+	 *
 	 * @return the dependency scope behavior
 	 */
 	AIiDependencyScopeBehavior getBehavior();

@@ -21,10 +21,16 @@ import java.util.List;
  */
 public interface AIiPolicyBackgroundDependenciesManager extends AIiManagedDependencies {
 
+	@Override
+	default List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedDependencies() {
+		return getManagedPolicyBackgroundDependencies();
+	}
+
 	/**
 	 * Gets the managed background dependencies
+	 *
 	 * @return the managed background dependencies
 	 */
-	List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> getManagedPolicyBackgroundDependencies();
+	List<AIiArtifactDependency<? extends AIiAbstractArtifact>> getManagedPolicyBackgroundDependencies();
 
 }

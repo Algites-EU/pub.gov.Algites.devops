@@ -22,5 +22,4 @@ public enum AInVersionQualifierKind {
 	PRE_RELEASE,
 	RELEASE,
 	POST_RELEASE,
-	;
 }

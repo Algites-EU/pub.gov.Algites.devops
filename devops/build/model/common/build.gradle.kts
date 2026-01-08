@@ -17,7 +17,12 @@ base {
     archivesName.set("pub.gov.Algites_build.model.common")
 }
 
+val jacksonVersion = "3.0.3"
 
+dependencies {
+    implementation("tools.jackson.core:jackson-databind:" + jacksonVersion)
+    implementation("tools.jackson.dataformat:jackson-dataformat-yaml:" + jacksonVersion)
+}
 
 plugins {
     `maven-publish`

@@ -5,8 +5,9 @@ package eu.algites.tool.build.model.common;
  * Title: {@link AInArtifactKind}
  * </p>
  * <p>
- * Description: The Kinds of the artifacts in Algites Development paradigm, described
- * in <a href="https://github.com/Algites-EU/pub.gov.Algites.specs/blob/main/Algites-Development-Structure-Specification.md">Algites Development Structure Specification</a>
+ * Description: The Kinds of the artifacts in Algites Development paradigm, described in <a
+ * href="https://github.com/Algites-EU/pub.gov.Algites.specs/blob/main/Algites-Development-Structure-Specification.md">Algites Development
+ * Structure Specification</a>
  * </p>
  * <p>
  * Copyright: Copyright (c) 2026 Artur Linhart, Algites
@@ -20,16 +21,13 @@ package eu.algites.tool.build.model.common;
  */
 public enum AInArtifactKind {
 
-
 	/**
-	 * General product artifact non-BOM intended to be productively used somewhere,
-	 * external dependency (jar/…)
+	 * General product artifact non-BOM intended to be productively used somewhere, external dependency (jar/…)
 	 */
 	UNCONTROLLED_CORE("(unknown core)", false, false, false),
 
 	/**
-	 * General product artifact non-BOM intended to be productively used somewhere,
-	 * external POM used for import only / may represent BOM
+	 * General product artifact non-BOM intended to be productively used somewhere, external POM used for import only / may represent BOM
 	 */
 	UNCONTROLLED_BOM("(unknown BOM)", false, false, true),
 
@@ -39,9 +37,8 @@ public enum AInArtifactKind {
 	PRODUCT_CORE("PROD", false, true, false),
 
 	/**
-	 * Product Test artifact containing the tests intended to be used
-	 * to inherit the tests from it or use the tests for the testing
-	 * of other artifacts
+	 * Product Test artifact containing the tests intended to be used to inherit the tests from it or use the tests for the testing of other
+	 * artifacts
 	 */
 	TEST_CORE("TST", false, true, false),
 
@@ -51,33 +48,29 @@ public enum AInArtifactKind {
 	AGGREGATOR("AGG", false, true, true),
 
 	/**
-	 * Policy artifact defining the policy of the building and dependencies
-	 * used by the product and test artifacts to execute the functionality
+	 * Policy artifact defining the policy of the building and dependencies used by the product and test artifacts to execute the
+	 * functionality
 	 */
 	POLICY("POL", false, true, true),
 
 	/**
-	 * Product background BOM artifact, generated automatically
-	 * from the artifact of the kind {@link #POLICY}
-	 * It contains the BOM of all materials, defined in the policy, so everything
-	 * used in the policy and policy parent policies is imported into this BOM
-	 * to assure the absolute consistency of anybody, who is developing something
-	 * "for the product defined by the policy" to be compatible with the givne policy.
+	 * Product background BOM artifact, generated automatically from the artifact of the kind {@link #POLICY} It contains the BOM of all
+	 * materials, defined in the policy, so everything used in the policy and policy parent policies is imported into this BOM to assure the
+	 * absolute consistency of anybody, who is developing something "for the product defined by the policy" to be compatible with the givne
+	 * policy.
 	 */
 	POLICY_BACKGROUND_BOM("PBBOM", true, true, true),
 
 	/**
-	 * Product interface BOM artifact, containing manually settled list
-	 * of the given product artifacts, depending on the given policy artifact,
-	 * without any pre-selection of the usage variant of the given product artifacts,
-	 * open for construction of own variant (e.g. Spring framework BOM)
+	 * Product interface BOM artifact, containing manually settled list of the given product artifacts, depending on the given policy
+	 * artifact, without any pre-selection of the usage variant of the given product artifacts, open for construction of own variant (e.g.
+	 * Spring framework BOM)
 	 */
 	PRODUCT_INTERFACE_BOM("PIBOM", false, true, true),
 
 	/**
-	 * Product varian BOM artifact, containing manually settled list
-	 * of the product artifacts, composing together some specific product or product line,
-	 * contianing already the compatible frameworks used by the products etc. (e.g. Spring boot BOM)
+	 * Product varian BOM artifact, containing manually settled list of the product artifacts, composing together some specific product or
+	 * product line, contianing already the compatible frameworks used by the products etc. (e.g. Spring boot BOM)
 	 */
 	PRODUCT_VARIANT_BOM("PVBOM", false, true, true),
 	;
@@ -92,32 +85,6 @@ public enum AInArtifactKind {
 		automaticallyGenerated = aAutomaticallyGenerated;
 		controlled = aControlled;
 		mavenPomArtifactTypeRequired = aMavenPomArtifactTypeRequired;
-	}
-
-	/**
-	 * @return the code
-	 */
-	public String getCode() {
-		return code;
-	}
-
-	/**
-	 * Automatically generated artifacts, like {@link #POLICY_BACKGROUND_BOM}
-	 * whcih directly depends on the {@link #POLICY} artifact.
-	 * The Automatically generated artifacts may not be included in the
-	 * algites-artifact.properties file.
-	 * @return the automaticallyGenerated
-	 */
-	public boolean isAutomaticallyGenerated() {
-		return automaticallyGenerated;
-	}
-
-	/**
-	 * Indicates, if the artifact is controlled by the framework (true) or uncontrolled (external - false)
-	 * @return the controlled
-	 */
-	public boolean isControlled() {
-		return controlled;
 	}
 
 	/**
@@ -136,6 +103,32 @@ public enum AInArtifactKind {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @return the code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * Automatically generated artifacts, like {@link #POLICY_BACKGROUND_BOM} whcih directly depends on the {@link #POLICY} artifact. The
+	 * Automatically generated artifacts may not be included in the algites-artifact.properties file.
+	 *
+	 * @return the automaticallyGenerated
+	 */
+	public boolean isAutomaticallyGenerated() {
+		return automaticallyGenerated;
+	}
+
+	/**
+	 * Indicates, if the artifact is controlled by the framework (true) or uncontrolled (external - false)
+	 *
+	 * @return the controlled
+	 */
+	public boolean isControlled() {
+		return controlled;
 	}
 
 	/**
