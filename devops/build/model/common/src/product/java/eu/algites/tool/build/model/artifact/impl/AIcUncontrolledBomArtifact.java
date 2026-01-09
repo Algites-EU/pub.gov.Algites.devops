@@ -1,7 +1,7 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiUncontrolledBomArtifact;
-import eu.algites.tool.build.model.artifact.common.AInArtifactKind;
+import eu.algites.tool.build.model.artifact.intf.AIiUncontrolledBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AInArtifactKind;
 
 /**
  * Mutable POJO implementation of {@link AIiUncontrolledBomArtifact}.
@@ -11,15 +11,11 @@ import eu.algites.tool.build.model.artifact.common.AInArtifactKind;
  * </p>
  * @author linhart1
  */
-public class AIcUncontrolledBomArtifact extends AIcUncontrolledArtifact implements AIiUncontrolledBomArtifact {
+public class AIcUncontrolledBomArtifact extends AIcAbstractUncontrolledArtifact implements AIiUncontrolledBomArtifact {
 
 	public AIcUncontrolledBomArtifact() {
 		super();
 		super.setArtifactKind(AInArtifactKind.UNCONTROLLED_BOM);
-	}
-
-	public AIcUncontrolledBomArtifact(String groupId, String artifactIdBase, String artifactVersion) {
-		super(groupId, artifactIdBase, AInArtifactKind.UNCONTROLLED_BOM, artifactVersion);
 	}
 
 	@Override

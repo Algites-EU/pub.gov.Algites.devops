@@ -10,7 +10,7 @@
 //        allprojects {
 //
 //            val repoProps = Properties().apply {
-//                load(rootProject.file("algites-repository.properties").inputStream())
+//                loader(rootProject.file("algites-source-repository.properties").inputStream())
 //            }
 //
 //            val lane = repoProps.getProperty("algites.repository.lane")
@@ -47,20 +47,21 @@
 
 import java.util.Properties
 
-fun computeAlgitesRepositoryVersion(): String {
-    val props = Properties()
-    file("algites-repository.properties").inputStream().use {
-        props.load(it)
-    }
+//fun computeAlgitesRepositoryVersion(): String {
+//    val props = Properties()
+//    file("algites-source-repository.properties").inputStream().use {
+//        props.load(it)
+//    }
+//
+//    val lane = props.getProperty("algites.repository.lane")
+//    val revision = props.getProperty("algites.repository.lane.revision")
+//    val suffix = props.getProperty("algites.repository.lane.revision.suffix") ?: ""
+//
+//    return "$lane.$revision$suffix"
+//}
+//
+//version=computeAlgitesRepositoryVersion()
 
-    val lane = props.getProperty("algites.repository.lane")
-    val revision = props.getProperty("algites.repository.lane.revision")
-    val suffix = props.getProperty("algites.repository.lane.revision.suffix") ?: ""
-
-    return "$lane.$revision$suffix"
-}
-
-version=computeAlgitesRepositoryVersion()
 // --- Dependency resolution repos (read) ---
 allprojects {
     layout.buildDirectory.set(

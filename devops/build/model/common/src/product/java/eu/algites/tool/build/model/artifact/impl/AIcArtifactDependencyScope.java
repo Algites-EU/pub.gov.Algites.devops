@@ -1,8 +1,8 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependencyScope;
-import eu.algites.tool.build.model.artifact.common.AIiDependencyScopeBehavior;
-import eu.algites.tool.build.model.artifact.common.AInArtifactDependencyScopeLevel;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependencyScope;
+import eu.algites.tool.build.model.artifact.intf.AIiDependencyScopeBehavior;
+import eu.algites.tool.build.model.artifact.intf.AInArtifactDependencyScopeLevel;
 
 import java.util.Objects;
 

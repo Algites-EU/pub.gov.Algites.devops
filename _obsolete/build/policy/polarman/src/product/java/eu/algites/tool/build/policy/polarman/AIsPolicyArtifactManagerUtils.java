@@ -32,7 +32,7 @@ public final class AIsPolicyArtifactManagerUtils {
 	 * containing the given marker file.
 	 *
 	 * @param startPath starting directory or file
-	 * @param markerFileName name of marker file (e.g. algites-repository.properties)
+	 * @param markerFileName name of marker file (e.g. algites-source-repository.properties)
 	 * @return path to repository root
 	 * @throws IllegalStateException if root cannot be found
 	 */

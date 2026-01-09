@@ -1,21 +1,22 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiControlledAggregatorArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledAggregatorArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledArtifact;
 
-import java.util.List;
+import java.nio.file.Path;
+import java.util.Map;
 import java.util.Objects;
 
-public class AIcControlledAggregatorArtifact extends AIcControlledArtifact implements AIiControlledAggregatorArtifact {
+public class AIcControlledAggregatorArtifact extends AIcAbstractControlledArtifact implements AIiControlledAggregatorArtifact {
 
-	private List<AIiControlledArtifact> containedArtifacts;
+	private Map<Path, AIiAbstractControlledArtifact> containedArtifacts;
 
 	@Override
-	public List<AIiControlledArtifact> getContainedArtifacts() {
+	public Map<Path, AIiAbstractControlledArtifact> getContainedArtifacts() {
 		return containedArtifacts;
 	}
 
-	public void setContainedArtifacts(List<AIiControlledArtifact> containedArtifacts) {
+	public void setContainedArtifacts(Map<Path, AIiAbstractControlledArtifact> containedArtifacts) {
 		this.containedArtifacts = containedArtifacts;
 	}
 

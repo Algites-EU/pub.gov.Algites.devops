@@ -1,7 +1,7 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiAbstractArtifact;
-import eu.algites.tool.build.model.artifact.common.AInArtifactKind;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractArtifact;
+import eu.algites.tool.build.model.artifact.intf.AInArtifactKind;
 
 import java.util.Objects;
 

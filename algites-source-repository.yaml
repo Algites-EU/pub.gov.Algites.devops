@@ -1,0 +1,11 @@
+sourceRepository:
+  id: pub.gov.Algites
+  name: Algites public governance repository
+  containedArtifactRelativePaths:
+    - devops/build/model/common
+
+versionContext:
+  releaseLine: "1"
+  revision: 0
+  qualifierKind: SNAPSHOT
+  qualifierLabel: SNAPSHOT

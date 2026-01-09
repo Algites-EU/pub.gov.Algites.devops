@@ -1,13 +1,13 @@
 package eu.algites.tool.build.model.artifact.validation;
 
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependencyScope;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactLink;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactProjection;
-import eu.algites.tool.build.model.artifact.common.AIiDependencyScopeBehavior;
-import eu.algites.tool.build.model.artifact.common.AIiDirectDependencies;
-import eu.algites.tool.build.model.artifact.common.AIiManagedDependencies;
-import eu.algites.tool.build.model.artifact.common.AInArtifactDependencyScopeLevel;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependencyScope;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactLink;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactProjection;
+import eu.algites.tool.build.model.artifact.intf.AIiDependencyScopeBehavior;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledDirectDependenciesArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledManagedDependenciesArtifact;
+import eu.algites.tool.build.model.artifact.intf.AInArtifactDependencyScopeLevel;
 
 /**
  * <p>
@@ -42,8 +42,8 @@ import eu.algites.tool.build.model.artifact.common.AInArtifactDependencyScopeLev
  * 		  <li><b>Target</b>: The artifact referenced by the dependency (via {@link AIiArtifactLink#getArtifact()}).</li>
  * 		  <li><b>Context</b>:
  * 		    <ul>
- * 		      <li><b>DIRECT</b>: dependency appears in {@link AIiDirectDependencies#getDirectDependencies()} (runtime dependencies list).</li>
- * 		      <li><b>MANAGED</b>: dependency appears in {@link AIiManagedDependencies#getManagedDependencies()} (dependencyManagement-style list).</li>
+ * 		      <li><b>DIRECT</b>: dependency appears in {@link AIiAbstractControlledDirectDependenciesArtifact#getDirectDependencies()} (runtime dependencies list).</li>
+ * 		      <li><b>MANAGED</b>: dependency appears in {@link AIiAbstractControlledManagedDependenciesArtifact#getManagedDependencies()} (dependencyManagement-style list).</li>
  * 		    </ul>
  * 		  </li>
  * 		  <li><b>ScopeLevel</b>: Logical dependency scope level (e.g. COMPILE/RUNTIME/TEST/PROVIDED/IMPORT, optionally UNDEFINED).</li>

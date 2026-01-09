@@ -1,9 +1,9 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiAbstractArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependencyScope;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactProjection;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependencyScope;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactProjection;
 
 import java.util.ArrayList;
 import java.util.List;

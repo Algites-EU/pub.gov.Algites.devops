@@ -1,19 +1,22 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiAbstractArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyBackgroundBomArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiUncontrolledArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledParentRwContainerArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyBackgroundBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractUncontrolledArtifact;
 
 import java.util.List;
 import java.util.Objects;
 
-public class AIcControlledPolicyBackgroundBomArtifact extends AIcControlledArtifact
-		implements AIiControlledPolicyBackgroundBomArtifact {
+public class AIcControlledPolicyBackgroundBomArtifact
+		extends AIcAbstractControlledArtifact
+		implements
+		  AIiControlledPolicyBackgroundBomArtifact,
+		  AIiAbstractControlledParentRwContainerArtifact<AIiControlledPolicyArtifact> {
 
 	private AIiControlledPolicyArtifact parent;
-	private List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> managedPolicyBackgroundDependencies;
+	private List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> managedPolicyBackgroundDependencies;
 
 	@Override
 	public AIiControlledPolicyArtifact getParent() {
@@ -25,12 +28,12 @@ public class AIcControlledPolicyBackgroundBomArtifact extends AIcControlledArtif
 	}
 
 	@Override
-	public List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> getManagedPolicyBackgroundDependencies() {
+	public List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> getManagedPolicyBackgroundDependencies() {
 		return managedPolicyBackgroundDependencies;
 	}
 
 	public void setManagedPolicyBackgroundDependencies(
-			List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> aManagedPolicyBackgroundDependencies) {
+			List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> aManagedPolicyBackgroundDependencies) {
 		this.managedPolicyBackgroundDependencies = aManagedPolicyBackgroundDependencies;
 	}
 

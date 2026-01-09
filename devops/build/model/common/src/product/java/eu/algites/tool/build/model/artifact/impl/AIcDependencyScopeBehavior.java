@@ -1,6 +1,6 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiDependencyScopeBehavior;
+import eu.algites.tool.build.model.artifact.intf.AIiDependencyScopeBehavior;
 
 public class AIcDependencyScopeBehavior implements AIiDependencyScopeBehavior {
 

@@ -2,13 +2,12 @@
 # ----------------------------------------------------
 # Notes:
 # - 'id' is a local unique key used for cross-references inside this YAML.
-# - 'kind' uses enum values from eu.algites.tool.build.model.artifact.common.AInArtifactKind
+# - 'kind' uses enum values from eu.algites.tool.build.model.artifact.intf.AInArtifactKind
 # - For controlled artifacts, you can specify 'versionContext'. For uncontrolled, use 'version'.
-# - Scope level uses enum values from eu.algites.tool.build.model.artifact.common.AInArtifactDependencyScopeLevel
+# - Scope level uses enum values from eu.algites.tool.build.model.artifact.intf.AInArtifactDependencyScopeLevel
 
 artifacts:
-  - id: pol.root
-    kind: POLICY
+  - kind: POLICY
     groupId: eu.algites
     artifactIdBase: pub.policy.root
     policyDefinitionUid: polRoot
@@ -25,8 +24,7 @@ artifacts:
           locked: true
           transitive: true
 
-  - id: pbom.root
-    kind: POLICY_BACKGROUND_BOM
+  - kind: POLICY_BACKGROUND_BOM
     groupId: eu.algites
     artifactIdBase: pub.policy.root-pbom
     parent: pol.root
@@ -42,8 +40,7 @@ artifacts:
           locked: true
           transitive: true
 
-  - id: pibom.api
-    kind: PRODUCT_INTERFACE_BOM
+  - kind: PRODUCT_INTERFACE_BOM
     groupId: eu.algites
     artifactIdBase: pub.product.api-pibom
     parent: pol.root
@@ -60,8 +57,7 @@ artifacts:
           locked: false
           transitive: true
 
-  - id: pvbom.demo
-    kind: PRODUCT_VARIANT_BOM
+  - kind: PRODUCT_VARIANT_BOM
     groupId: eu.algites
     artifactIdBase: pub.product.demo-pvbom
     parent: pol.root
@@ -78,8 +74,7 @@ artifacts:
           locked: false
           transitive: true
 
-  - id: ctrl.jackson
-    kind: PRODUCT_CORE
+  - kind: PRODUCT_CORE
     groupId: com.fasterxml.jackson.core
     artifactIdBase: jackson-databind
     parent: pol.root
@@ -98,14 +93,12 @@ artifacts:
           - target: ext.junit
             type: jar
 
-  - id: ext.slf4j
-    kind: UNCONTROLLED_CORE
+  - kind: UNCONTROLLED_CORE
     groupId: org.slf4j
     artifactIdBase: slf4j-api
     version: "2.0.16"
 
-  - id: ext.junit
-    kind: UNCONTROLLED_CORE
+  - kind: UNCONTROLLED_CORE
     groupId: org.junit.jupiter
     artifactIdBase: junit-jupiter-api
     version: "5.11.0"

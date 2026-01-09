@@ -50,7 +50,7 @@ public final class AIcPolicyArtifactManager {
 
 		Path root = Path.of(opts.getOrDefault("--root", ".")).normalize();
 		Path policyFile = root.resolve(opts.getOrDefault("--policy-file", "algites-artifact.properties"));
-		final String locRepositoryFileName = opts.getOrDefault("--repository-file", "algites-repository.properties");
+		final String locRepositoryFileName = opts.getOrDefault("--repository-file", "algites-source-repository.properties");
 		Path repositoryRoot = AIsPolicyArtifactManagerUtils.findRepositoryRoot(root, locRepositoryFileName);
 		Path repositoryFile = repositoryRoot.resolve(locRepositoryFileName);
 		Path outDir = root.resolve(opts.getOrDefault("--out", "run/bld/polarman"));
@@ -70,9 +70,9 @@ public final class AIcPolicyArtifactManager {
 	private static void usage() {
 		System.out.println("""
             algites-policy-gen
-              generate --root . [--policy-file algites-artifact.properties] [--repository-file algites-repository.properties] [--out run/gen]
-              validate --root . [--policy-file algites-artifact.properties] [--repository-file algites-repository.properties]
-              scaffold --dir <path_inside_repository> --AlgitesPolicyArtifactGroupId <gid> --AlgitesPolicyArtifactArtifactIdBase <aid> --AlgitesPolicyId <id> --AlgitesPolicyVersion <ver> [--repository-file algites-repository.properties]
+              generate --root . [--policy-file algites-artifact.properties] [--repository-file algites-source-repository.properties] [--out run/gen]
+              validate --root . [--policy-file algites-artifact.properties] [--repository-file algites-source-repository.properties]
+              scaffold --dir <path_inside_repository> --AlgitesPolicyArtifactGroupId <gid> --AlgitesPolicyArtifactArtifactIdBase <aid> --AlgitesPolicyId <id> --AlgitesPolicyVersion <ver> [--repository-file algites-source-repository.properties]
             """);
 	}
 

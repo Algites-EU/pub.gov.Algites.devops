@@ -1,20 +1,23 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledProductInterfaceBomArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledProductVariantBomArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiUncontrolledArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledParentRwContainerArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledProductInterfaceBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledProductVariantBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractUncontrolledArtifact;
 
 import java.util.List;
 import java.util.Objects;
 
-public class AIcControlledProductVariantBomArtifact extends AIcControlledArtifact
-		implements AIiControlledProductVariantBomArtifact {
+public class AIcControlledProductVariantBomArtifact extends AIcAbstractControlledArtifact
+		implements
+		  AIiControlledProductVariantBomArtifact,
+		  AIiAbstractControlledParentRwContainerArtifact<AIiControlledPolicyArtifact> {
 
 	private AIiControlledPolicyArtifact parent;
 	private AIiControlledProductInterfaceBomArtifact productInterfaceBom;
-	private List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> managedProductVariantDependencies;
+	private List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> managedProductVariantDependencies;
 
 	@Override
 	public AIiControlledPolicyArtifact getParent() {
@@ -35,12 +38,12 @@ public class AIcControlledProductVariantBomArtifact extends AIcControlledArtifac
 	}
 
 	@Override
-	public List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> getManagedProductVariantDependencies() {
+	public List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> getManagedProductVariantDependencies() {
 		return managedProductVariantDependencies;
 	}
 
 	public void setManagedProductVariantDependencies(
-			List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> managedProductVariantDependencies) {
+			List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> managedProductVariantDependencies) {
 		this.managedProductVariantDependencies = managedProductVariantDependencies;
 	}
 

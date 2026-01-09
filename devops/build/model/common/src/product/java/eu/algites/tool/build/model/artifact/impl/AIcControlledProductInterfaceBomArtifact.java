@@ -1,20 +1,23 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiControlledArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyBackgroundBomArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiControlledProductInterfaceBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledParentRwContainerArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyBackgroundBomArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledProductInterfaceBomArtifact;
 
 import java.util.List;
 import java.util.Objects;
 
-public class AIcControlledProductInterfaceBomArtifact extends AIcControlledArtifact
-		implements AIiControlledProductInterfaceBomArtifact {
+public class AIcControlledProductInterfaceBomArtifact extends AIcAbstractControlledArtifact
+		implements
+		  AIiControlledProductInterfaceBomArtifact,
+		  AIiAbstractControlledParentRwContainerArtifact<AIiControlledPolicyArtifact> {
 
 	private AIiControlledPolicyArtifact parent;
 	private AIiControlledPolicyBackgroundBomArtifact policyBackgroundBom;
-	private List<AIiArtifactDependency<? extends AIiControlledArtifact>> managedInterfaceDependencies;
+	private List<AIiArtifactDependency<? extends AIiAbstractControlledArtifact>> managedInterfaceDependencies;
 
 	@Override
 	public AIiControlledPolicyArtifact getParent() {
@@ -35,11 +38,11 @@ public class AIcControlledProductInterfaceBomArtifact extends AIcControlledArtif
 	}
 
 	@Override
-	public List<AIiArtifactDependency<? extends AIiControlledArtifact>> getManagedInterfaceDependencies() {
+	public List<AIiArtifactDependency<? extends AIiAbstractControlledArtifact>> getManagedInterfaceDependencies() {
 		return managedInterfaceDependencies;
 	}
 
-	public void setManagedInterfaceDependencies(List<AIiArtifactDependency<? extends AIiControlledArtifact>> managedInterfaceDependencies) {
+	public void setManagedInterfaceDependencies(List<AIiArtifactDependency<? extends AIiAbstractControlledArtifact>> managedInterfaceDependencies) {
 		this.managedInterfaceDependencies = managedInterfaceDependencies;
 	}
 

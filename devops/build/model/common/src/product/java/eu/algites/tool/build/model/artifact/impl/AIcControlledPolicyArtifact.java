@@ -1,15 +1,20 @@
 package eu.algites.tool.build.model.artifact.impl;
 
-import eu.algites.tool.build.model.artifact.common.AIiAbstractArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiArtifactDependency;
-import eu.algites.tool.build.model.artifact.common.AIiControlledPolicyArtifact;
-import eu.algites.tool.build.model.artifact.common.AIiUncontrolledArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractControlledParentRwContainerArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiArtifactDependency;
+import eu.algites.tool.build.model.artifact.intf.AIiControlledPolicyArtifact;
+import eu.algites.tool.build.model.artifact.intf.AIiAbstractUncontrolledArtifact;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AIcControlledPolicyArtifact extends AIcControlledArtifact implements AIiControlledPolicyArtifact {
+public class AIcControlledPolicyArtifact
+		extends AIcAbstractControlledArtifact
+		implements
+		  AIiControlledPolicyArtifact,
+		  AIiAbstractControlledParentRwContainerArtifact<AIiAbstractArtifact> {
 
 	private String policyDefinitionUid;
 	private String policyDefinitionVersion;
@@ -17,7 +22,7 @@ public class AIcControlledPolicyArtifact extends AIcControlledArtifact implement
 	private AIiAbstractArtifact parent;
 
 	private List<AIiArtifactDependency<? extends AIiAbstractArtifact>> directDependencies;
-	private List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> managedPolicyBackgroundDependencies;
+	private List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> managedPolicyBackgroundDependencies;
 
 	public AIcControlledPolicyArtifact() {
 		// keep kind provided by YAML (or caller)
@@ -66,12 +71,12 @@ public class AIcControlledPolicyArtifact extends AIcControlledArtifact implement
 	}
 
 	@Override
-	public List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> getManagedPolicyBackgroundDependencies() {
+	public List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> getManagedPolicyBackgroundDependencies() {
 		return managedPolicyBackgroundDependencies;
 	}
 
 	public void setManagedPolicyBackgroundDependencies(
-			List<AIiArtifactDependency<? extends AIiUncontrolledArtifact>> managedPolicyBackgroundDependencies) {
+			List<AIiArtifactDependency<? extends AIiAbstractUncontrolledArtifact>> managedPolicyBackgroundDependencies) {
 		this.managedPolicyBackgroundDependencies = managedPolicyBackgroundDependencies;
 	}
 

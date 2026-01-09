@@ -164,7 +164,7 @@ All branches not matching the above patterns are treated as:
 [//]: # (Add an optional file at repository root:)
 
 [//]: # ()
-[//]: # (- `algites-repository.properties`)
+[//]: # (- `algites-source-repository.properties`)
 
 [//]: # ()
 [//]: # (Example:)
@@ -586,7 +586,7 @@ Lane meaning:
 
 #### 3.1.2. Repository metadata
 
-To use the lanes on the project, the repo MUST contain `algites-repository.properties` in repository root with the defined lane identification:
+To use the lanes on the project, the repo MUST contain `algites-source-repository.properties` in repository root with the defined lane identification:
 
 ```properties
 algites.repository.lane=1.1
@@ -630,7 +630,7 @@ This eliminates constant conflicts during upmerge (because `C` is not stored in 
 The unified CI workflow computes the snapshot version and then runs either Gradle or Maven:
 
 ##### 3.1.4.1 Build tool selection
-`algites-repository.properties` (optional):
+`algites-source-repository.properties` (optional):
 
 ```properties
 algites.build-tool=auto     # default

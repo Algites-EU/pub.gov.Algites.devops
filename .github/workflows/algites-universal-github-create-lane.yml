@@ -127,18 +127,18 @@ jobs:
             TMP="create-lane/${TO}-$(date +%Y%m%d%H%M%S)"
             git switch -c "$TMP" "refs/remotes/origin/${FROM}"
 
-            if [[ ! -f "algites-repository.properties" ]]; then
-              echo "ERROR: algites-repository.properties not found in repo root on ${FROM}." >&2
+            if [[ ! -f "algites-source-repository.properties" ]]; then
+              echo "ERROR: algites-source-repository.properties not found in repo root on ${FROM}." >&2
               exit 1
             fi
 
-            if grep -qE '^repo\.lane=' algites-repository.properties; then
-              sed -i "s/^repo\.lane=.*/repo.lane=${NEW}/" algites-repository.properties
+            if grep -qE '^repo\.lane=' algites-source-repository.properties; then
+              sed -i "s/^repo\.lane=.*/repo.lane=${NEW}/" algites-source-repository.properties
             else
-              echo "repo.lane=${NEW}" >> algites-repository.properties
+              echo "repo.lane=${NEW}" >> algites-source-repository.properties
             fi
 
-            git add algites-repository.properties
+            git add algites-source-repository.properties
             git commit -m "Create lane ${TO} (from ${FROM})"
             git push origin "HEAD:${TO}"
 
