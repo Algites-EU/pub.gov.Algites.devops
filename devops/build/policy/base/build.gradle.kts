@@ -1,3 +1,10 @@
+plugins {
+    `maven-publish`
+    `kotlin-dsl`
+    `java-gradle-plugin`
+}
+
+
 java {
     sourceSets {
         val main by getting {
@@ -11,11 +18,7 @@ java {
     }
 }
 
-group = "eu.algites.tool.build"
-
-base {
-    archivesName.set("pub.gov.Algites_build.policy.base")
-}
+group = "eu.algites.gov.devops"
 
 val PLUGIN_ID = "eu.algites.tool.build.policy.base"
 

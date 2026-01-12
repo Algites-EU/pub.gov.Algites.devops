@@ -10,8 +10,6 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/devops" />
             <option value="$PROJECT_DIR$/devops/build" />
-            <option value="$PROJECT_DIR$/devops/build/model" />
-            <option value="$PROJECT_DIR$/devops/build/model/common" />
             <option value="$PROJECT_DIR$/devops/build/policy" />
             <option value="$PROJECT_DIR$/devops/build/policy/base" />
           </set>

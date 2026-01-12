@@ -4,7 +4,7 @@
 #   @version_<groupId>_<artifactId>@
 #
 algites.policy.artifact.groupId=eu.algites.tool.build
-algites.policy.artifact.artifactIdBase=pub.gov.Algites_build.policy.base
+algites.policy.artifact.artifactId=pub.gov.Algites_build.policy.base
 algites.policy.id=algites.build.base.pub
 algites.policy.version=2026.01
 

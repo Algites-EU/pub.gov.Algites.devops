@@ -6,7 +6,7 @@
 
 	<!-- Published parent POM generated from this template -->
 	<groupId>@algites.policy.artifact.groupId@</groupId>
-	<artifactId>@algites.policy.artifact.artifactIdBase@-maven</artifactId>
+	<artifactId>@algites.policy.artifact.artifactId@-maven</artifactId>
 	<version>@algites.repository.lane@.@algites.repository.lane.revision@@algites.repository.lane.revision.suffix@</version>
 	<packaging>pom</packaging>
 
@@ -112,7 +112,7 @@
 		</repository>
 		<snapshotRepository>
 			<id>algites-public-snapshots-upload</id>
-			<url>https://dl.cloudsmith.io/maven/algites/maven-snapshots-pub/</url>
+			<url>https://dl.cloudsmith.io/maven/algites/maven-snapshots-pub/maven/</url>
 <!--			<url>https://maven.cloudsmith.io/algites/maven-snapshots-pub/</url>-->
 		</snapshotRepository>
 	</distributionManagement>

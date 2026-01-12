@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public final class AIcPolicyArtifactManager {
 
 	public static final String ALGITES_POLICY_ARTIFACT_GROUP_ID = "algites.policy.artifact.groupId";
-	public static final String ALGITES_POLICY_ARTIFACT_ARTIFACT_ID_BASE = "algites.policy.artifact.artifactIdBase";
+	public static final String ALGITES_POLICY_ARTIFACT_ARTIFACT_ID_BASE = "algites.policy.artifact.artifactId";
 	public static final String ALGITES_POLICY_ID = "algites.policy.id";
 	public static final String ALGITES_POLICY_VERSION = "algites.policy.version";
 
@@ -72,7 +72,7 @@ public final class AIcPolicyArtifactManager {
             algites-policy-gen
               generate --root . [--policy-file algites-artifact.properties] [--repository-file algites-source-repository.properties] [--out run/gen]
               validate --root . [--policy-file algites-artifact.properties] [--repository-file algites-source-repository.properties]
-              scaffold --dir <path_inside_repository> --AlgitesPolicyArtifactGroupId <gid> --AlgitesPolicyArtifactArtifactIdBase <aid> --AlgitesPolicyId <id> --AlgitesPolicyVersion <ver> [--repository-file algites-source-repository.properties]
+              scaffold --dir <path_inside_repository> --AlgitesPolicyArtifactGroupId <gid> --AlgitesPolicyArtifactArtifactId <aid> --AlgitesPolicyId <id> --AlgitesPolicyVersion <ver> [--repository-file algites-source-repository.properties]
             """);
 	}
 
@@ -169,7 +169,7 @@ public final class AIcPolicyArtifactManager {
 	private static void scaffold(Map<String, String> opts, Path aRepositoryRoot, Path aRepositoryFile) throws IOException {
 		Path dir = Path.of(requireOpt(opts, "--dir"));
 		String locPolicyArtifactGroupId = requireOpt(opts, "--AlgitesPolicyArtifactGroupId");
-		String locPolicyArtifactIdBase = requireOpt(opts, "--AlgitesPolicyArtifactArtifactIdBase");
+		String locPolicyArtifactId = requireOpt(opts, "--AlgitesPolicyArtifactArtifactId");
 		String locPolicyId = requireOpt(opts, "--AlgitesPolicyId");
 		String locPolicyVersion = requireOpt(opts, "--AlgitesPolicyVersion");
 
@@ -181,14 +181,14 @@ public final class AIcPolicyArtifactManager {
 			String content = """
                 # Algites policy artifact marker + data
                 algites.policy.artifact.groupId=%s
-                algites.policy.artifact.artifactIdBase=%s
+                algites.policy.artifact.artifactId=%s
                 algites.policy.id=%s
                 algites.policy.version=%s
 
                 # Add versions here (examples)
                 #version.junit=5.10.2
                 #version.kotlin=1.9.25
-                """.formatted(locPolicyArtifactGroupId, locPolicyArtifactIdBase, locPolicyId, locPolicyVersion);
+                """.formatted(locPolicyArtifactGroupId, locPolicyArtifactId, locPolicyId, locPolicyVersion);
 			writeFile(policyProps, content);
 		}
 
@@ -205,10 +205,10 @@ public final class AIcPolicyArtifactManager {
                          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
                   <modelVersion>4.0.0</modelVersion>
                   <locArtifactGroupId>@algites.policy.artifact.groupId@</locArtifactGroupId>
-                  <artifactId>@algites.policy.artifact.artifactIdBase@-maven</artifactId>
+                  <artifactId>@algites.policy.artifact.artifactId@-maven</artifactId>
                   <version>@algites.repository.lane@.@algites.repository.lane.revision@@algites.repository.lane.suffix@</version>
                   <packaging>pom</packaging>
-                  <name>@algites.policy.artifact.artifactIdBase@ Maven artifact</name>
+                  <name>@algites.policy.artifact.artifactId@ Maven artifact</name>
                 </project>
                 """);
 		}
