@@ -907,7 +907,7 @@ Examples:
 
 ---
 
-#### 3.2. Project Build
+### 3.2. Project Build
 
 #### 3.2.5 Maven and Gradle Unification Model
 
