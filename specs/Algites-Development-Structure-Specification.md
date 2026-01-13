@@ -1,4 +1,4 @@
-[[FINAL-APPROVED]]
+[[FINALLY-APPROVED]]
 # Algites Repository and Artifact Naming Standard
 **Version:** 1.7
 **Status:** Normative
@@ -380,6 +380,9 @@ while extending them with explicit visibility and repository/module separation s
 This standard is normative for all Algites projects.
 
 ---
+[[/FINALLY-APPROVED]]
+
+[[UNVERIFIED]]
 
 ## 3. Algites Artifact and Dependency Model
 
@@ -401,10 +404,18 @@ This chapter defines the **model-first** structure used by Algites to describe a
 
 ### 3.2. Core Concepts and Terminology
 
+We distinguish the artifact through **Artifact Class** which defines how the artifacts are treated in Algites source repository:
+- **Controlled Artifacts** are artifacts that are controlled by the Algites rules and defined explicitly within the
+  repository by custom configuration files (yaml/json).
+- **Uncontrolled Artifacts** are artifacts that are not controlled by the given repository, so those are artifacts
+  from other source repositories or completely other producers and sources.
+
+In the case of the internal handling of the Artifacts, we recognize the following concepts:
+
 - **Artifact**: a modeled buildable unit (module), producing one or more **outputs**.
 - **ArtifactCoordinateId**: a stable identifier for an artifact in the Algites model (not necessarily identical to Maven GAV).
 - **OutputType**: a specific output contract of an artifact (e.g., jar, parent-pom, bom, plugin-marker, etc.).
-- **Output key (`depKey`)**: `artifactCoordinateId + outputType` used to identify a dependency intent target.
+- **Output key (`outputKey`)**: `artifactCoordinateId + outputType` used to identify a dependency intent target.
 - **Repository configuration**: the root of a repository model, treated as:
     - **root container** (container inheritance origin), and
     - **root parent** (parent inheritance origin).
@@ -515,9 +526,9 @@ Merge semantics:
     - identical definition → OK,
     - different definition → **error** (forces explicit resolution via id change or governance rule).
 
-#### 3.5.3 DependencyIntentTemplateSets (depKey = artifactCoordinateId + outputType)
+#### 3.5.3 DependencyIntentTemplateSets (outputKey = artifactCoordinateId + outputType)
 
-A **DependencyIntentTemplateSet** defines *concrete dependency intents* by `depKey = artifactCoordinateId + outputType`, each intent referencing:
+A **DependencyIntentTemplateSet** defines *concrete dependency intents* by `outputKey = artifactCoordinateId + outputType`, each intent referencing:
 - one or more **rule template sets** (e.g., `mavenCompile`, `gradleCompileOnly`),
 - optional inline **granular rules** (non-version),
 - optional **uncontrolled version rules** (`ranges[]`, `preferred`) that apply only to uncontrolled dependencies.
@@ -585,7 +596,7 @@ Version rules for uncontrolled:
 - The model may load catalogs and references without immediate existence checks.
 - A final validation phase must:
     - ensure all referenced template sets exist,
-    - ensure depKeys can be interpreted (at least structurally),
+    - ensure outputKeys can be interpreted (at least structurally),
     - ensure no unresolved versions remain under strict publish policies,
     - ensure no rule collisions remain (id collisions, weight ties, incompatible ranges).
 
@@ -603,7 +614,7 @@ This makes output typing deterministic, tool-agnostic, and safely extensible.
 
 ---
 
-#### 3.7.1 OutputType Data Model
+#### 3.7.1 Artifact Output Class Data Model
 
 **OutputType fields**
 - `builtinOutputKind: AInArtifactBuiltinOutputKind`
@@ -632,10 +643,12 @@ Each enum item MUST have:
 Typical builtin kinds (illustrative, not exhaustive, builtin types use the unique id starting with "builtin:"
 and the identification is interpreted as complete uid, the custom types must have the uid starting with "custom:"):
 
-- `JAR` (`builtin:jar`) — binary library artifact
-- `SOURCES_JAR` (`builtin:sourcesJar`) — sources artifact
-- `JAVADOC_JAR` (`builtin:javadocJar`) — javadoc artifact
-- `MAVEN_POM` (`builtin:mavenPom`) — standard module POM publication
+- `MAIN_JAVA_CLASSES_JAR` (`builtin:jar`) — binary library artifact
+- `MAIN_JAVA_SOURCE_JAR` (`builtin:sourcesJar`) — sources artifact
+- `MAIN_JAVA_DOC_JAR` (`builtin:javadocJar`) — javadoc artifact
+- `MAIN_MAVEN_POM` (`builtin:mavenPom`) — standard module POM publication
+ 
+to be later discussed if something like this is reasonable, probably not::
 - `PARENT_POM` (`builtin:parentPom`) — parent-style POM (inheritance contract)
 - `BOM` (`builtin:bom`) — dependency steering output (constraints/catalog)
 - `PLUGIN_MARKER` (`builtin:pluginMarker`) — Gradle plugin marker publication
@@ -688,7 +701,7 @@ Implementations MUST NOT invent additional derivation rules beyond the above.
 
 Dependency intents reference outputs via the **dependency key**:
 
-- `depKey = artifactCoordinateId + outputType`
+- `outputKey = artifactCoordinateId + outputType`
 
 This enables a dependency to target *specific* contracts, for example:
 - a `PARENT_POM` output as the parent-like inheritance contract
@@ -792,17 +805,534 @@ Build integration:
 - CI: supplies publishing targets (download/upload endpoints) via environment/properties consistent with Algites conventions.
 
 ---
+[[/UNVERIFIED]]
 
-### 3.10. Migration Notes (temporary; will be removed)
+[[FINALLY-APPROVED]]
 
-This section is intentionally placed at the end and is **temporary**.
+### 3.10. Artifact Roles
 
-- Previous models that relied on **ArtifactKind** (policy/bom/aggregator/etc.) should be migrated by:
-    - replacing “kind-driven behavior” with explicit **ContainerVersionContext** + **DependencyIntent** activation,
-    - moving BOM/policy logic into **OutputType** + intent rule templates for dependency steering.
-- Aggregator artifacts remain possible, but are no longer mandatory just to express policy inheritance:
-    - repo-root and containers can supply catalogs,
-    - parent edges define baseline dependency intents.
+This chapter defines the logical classification of artifacts used within the Algites ecosystem.
+Artifact types are **cummulateable**; each type has a clearly defined role, but one artifact can play multiple roles at the same time
+The distinction between artifact roles is fundamental for general better organization of large projects.
+
+#### 3.10.1 General Artifact Classification
+
+All Algites repositories and projects contain controlled artifacts (in every repository) of the following high-level roles:
+
+- **Core Artifact**
+- **Aggregator Artifact**
+- **Policy Artifact**
+- **BOM Artifact**
+
+Each artifact role:
+- has a distinct purpose,
+- participates differently in dependency resolution and build execution,
+- and is subject to different governance and lifecycle rules.
+- but one artifact can play more roles at the same time.
+
+Artifact role can be identifiable by its structure and declared role, not only by naming conventions alone.
+
+```mermaid
+flowchart TD
+    A[Artifact] --> P[Production Artifact]
+    A --> G[Aggregator Artifact]
+    A --> L[Policy Artifact]
+```
+
+---
+
+#### 3.10.2 Core Artifacts
+
+Core artifacts represent deliverables that contain executable or consumable functionality.
+
+##### 3.10.2.1 Definition
+
+A Production Artifact is an artifact that:
+- contains source code and/or resources,
+- produces a runtime or compile-time deliverable (e.g. JAR),
+- is intended to be consumed by other artifacts or applications.
+
+##### 3.10.2.2 Characteristics
+
+Production artifacts:
+- usually does NOT define concrete dependency versions directly.
+- it usually does rely on inherited or imported version policy.
+
+##### 3.10.2.3 Maven Representation
+
+In Maven, a Production Artifact:
+- uses a policy parent POM or imports a policy BOM,
+- declares dependencies without hardcoded versions,
+- since the Maven is not the supported Algites build system, the artifact is
+  to Maven related as the maven compatible output only.
+
+##### 3.10.2.4 Gradle Representation
+
+In Gradle, a Core Artifact:
+- applies a policy Gradle plugin,
+- declares dependencies without versions,
+- MUST NOT read version definition files directly.
+
+```mermaid
+flowchart LR
+    PP[Policy Parent / BOM] --> PA[Production Artifact]
+    PP -->|version rules| PA
+```
+
+---
+
+#### 3.10.3 Aggregator Artifacts
+
+Aggregator artifacts provide structural grouping and coordinated build execution.
+
+##### 3.10.3.1 Definition
+
+An Aggregator Artifact is an artifact that:
+- exists to group multiple artifacts,
+- it usually does not represent a deliverable on its own,
+- orchestrates build execution across its children.
+- the aggregator artifact can be identical with the policy artifact and fulfill both roles at the same
+
+##### 3.10.3.2 Characteristics
+
+Aggregator artifacts:
+- usually contain no source code.
+- can define dependency versions.
+- it usually does not introduce a build policy.
+- it usually is not used as dependency targets.
+
+##### 3.10.3.3 Maven Representation
+
+In Maven, an Aggregator Artifact:
+- has `packaging = pom`,
+- lists child modules via `<modules>`,
+- is not usually intended to be referenced as a parent for policy purposes,munless plays the policy artifact role.
+
+##### 3.10.3.4 Gradle Representation
+
+In Gradle, an Aggregator Artifact:
+- is represented by a composite build or multi-project root,
+- declares included projects in `settings.gradle(.kts)`,
+- delegates build logic to included modules.
+
+```mermaid
+flowchart TD
+    AGG[Aggregator] --> M1[Module A]
+    AGG --> M2[Module B]
+    AGG --> M3[Module C]
+```
+
+---
+
+#### 3.10.4 Policy Artifacts
+
+Policy artifacts define shared structural, versioning, and build rules.
+
+##### 3.10.4.1 Definition
+
+A Policy Artifact is an artifact that:
+- defines version and/or build policy,
+- usually produces no runtime functionality,
+- it usually serves as a governance contract for dependent artifacts.
+
+Policy artifacts are **a highly recommended place** where version definitions are allowed.
+The policy artifact can be identical with the aggregator artifact and fulfill both roles
+
+##### 3.10.4.2 Responsibilities
+
+Policy artifacts:
+- define dependency versions symbolically,
+- define plugin versions symbolically,
+- provide enforcement and validation rules,
+- ensure consistency across the artifact graph.
+- can produce automatically a corresponding policy background BOM artifact 
+  (see the builtin artifact output types)
+
+##### 3.10.4.3 Maven Representation
+
+In Maven, a Policy Artifact plays the role of:
+- a **policy parent POM** (for inheritance),
+- as well as **policy BOM** (for import-based usage).
+
+##### 3.10.4.4 Gradle Representation
+
+In Gradle, a Policy Artifact produces:
+- a **policy Gradle plugin**.
+
+The policy plugin:
+- applies dependency constraints or platforms,
+- injects shared repositories and build conventions,
+- enforces version and structural rules.
+
+```mermaid
+flowchart LR
+    PDA[Policy Definition Artifact]
+    PDA --> MP[Maven Policy Parent POM & BOM]
+    PDA --> GP[Gradle Policy Plugin]
+```
+
+---
+
+#### 3.10.5 BOM Artifacts
+
+BOM artifacts (Bill Of Materials) are **POM-packaged** artifacts whose primary purpose is to provide **version alignment** to consumers. They are published to the Maven repository alongside production artifacts and may be consumed by both Maven and Gradle builds.
+
+This section standardizes Algites BOM terminology, responsibilities, generation rules, and usage patterns. It also clarifies why different BOM categories exist and what problems each category solves.
+
+> **Key principle:** A “BOM” is not one thing. In Algites we distinguish three BOM categories with different semantics and lifecycle:
+>
+> - **Policy Background BOM (PBBOM)** — generated, hierarchical, background version alignment for *framework-independent* external components forced by the product policy.
+> - **Product Interface BOM (PIBOM)** — curated, library/product catalog of the product’s own modules.
+> - **Product Variant BOM (PVBOM)** — curated, opinionated platform/stack BOM combining multiple options into one specific product variant.
+
+---
+
+##### 3.10.5.1 Definitions and scope
+
+###### 3.10.5.1.1 What a BOM is (in Algites)
+
+A BOM is an artifact usually with:
+
+- `packaging = pom`
+- a `dependencyManagement` section listing dependency coordinates with pinned versions
+- **no compiled code**
+- intended consumption via Maven **import scope** (or equivalent mechanisms in Gradle)
+
+A BOM **should not add dependencies** by itself. It only defines versions to be used *if* the consumer declares the dependency without a version.
+
+###### 3.10.5.1.2 What a BOM is not
+
+A BOM is **not**:
+
+- a build convention carrier (that is the role of a parent POM)
+- a plugin configuration carrier (pluginManagement belongs to parent POMs)
+- a “complete build setup” (CI/build tooling is handled elsewhere)
+- a replacement for product documentation or curated compatibility matrices (except where explicitly modeled as PVBOM)
+- hence, in the new artifact concept the BOM role can be unified with oter roles, if necessary, the users are free to choose the project structure they find useful.
+
+###### 3.10.5.1.3 Maven compatibility boundary
+
+Maven semantics impose important constraints:
+
+- `dependencyManagement` is applied to dependencies declared in the consuming project.
+- `<scope>test</scope>` dependencies are **not transitive** and should not be relied on for sharing test dependencies.
+- Version alignment is a **consumer-side** mechanism: consumers can still override versions explicitly (which may break compatibility). BOMs reduce risk; they do not technically prevent misuse.
+
+---
+
+##### 3.10.5.2 BOM categories (Algites standard)
+
+###### 3.10.5.2.1 Policy Background BOM (PBBOM)
+
+#### Purpose
+
+The **Policy Background BOM (PBBOM)** provides a **shared version background** for components that must remain *framework-independent* (e.g., plugins, adapters, generic interfaces), yet must be developed against a consistent ecosystem background to avoid classpath conflicts when later integrated into a product/framework runtime.
+
+Typical use-case:
+
+- A component does **not** depend on Spring (or any specific framework) at compile time.
+- The component will later be loaded/used within a Spring-based application (or another framework runtime).
+- To avoid runtime conflicts (logging, annotations, bytecode libs, Jakarta/Javax split, etc.), the component is built against the same **background alignment** as the target platform.
+
+#### Characteristics
+
+- **Generated automatically** from a Artifact fultilling the policy role.
+- **Hierarchical** (imports parent PBBs) to keep background alignment consistent across inherited policies.
+- Contains only **background** dependencies (no “product module catalog”).
+- Intended primarily for **component developers** and integration layers.
+
+#### Hierarchy rule (normative)
+
+If policy `Y` inherits from policy `X`, then:
+
+- `PBBOM-Y` **MUST import** `PBBOM-X` (exact aligned version), and
+- `PBBOM-Y` **MAY add** additional background constraints specific to policy `Y`.
+
+This creates a deterministic, layered background alignment while keeping the policy inheritance semantics explicit.
+
+#### Maven usage example
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>eu.algites.policy</groupId>
+      <artifactId>algites-pbbom-y</artifactId>
+      <version>Y_VERSION</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
+
+#### Gradle usage example
+
+In Gradle, you typically consume the corresponding alignment through a version catalog or a platform import. When publishing to Maven repos, Gradle projects can still import BOMs via dependency constraints (platform).
+
+```kotlin
+dependencies {
+  implementation(platform("eu.algites.policy:algites-pbbom-y:Y_VERSION"))
+}
+```
+
+#### What belongs into PBBOM (guideline)
+
+Include “background” libraries that commonly cause classpath/version conflicts across ecosystems, for example:
+
+- logging APIs and bridges
+- annotations libraries
+- bytecode / proxy libs
+- jakarta/jaxb/jaxrs stacks (where relevant)
+- JSON core libs (if used broadly as infrastructure)
+- common utility libraries that should be aligned across the runtime
+
+Exclude:
+
+- product module catalogs (those belong to PIBOM)
+- opinionated application stacks (those belong to PVBOM)
+
+---
+
+###### 3.10.5.2.2 Product Interface BOM (PIBOM)
+
+#### Purpose
+
+The **Product Interface BOM (PIBOM)** is the **product/library curated catalog BOM**. It enumerates the product’s own published modules so that consumers can declare them without specifying versions, while remaining neutral about external stacks.
+
+Example: A Spring Framework-style BOM enumerating Spring modules.
+
+#### Characteristics
+
+- **Curated manually** (or semi-automated with curated inputs).
+- Enumerates **product artifacts** (the modules that the product provides).
+- Typically **non-hierarchical** as a BOM (no implicit inheritance). It may be versioned as part of the product release.
+- Does not attempt to define a full application stack; it stays within the product boundary.
+
+#### Why PIBOM is not auto-generated from Policy Artifacts
+
+A Policy Artifact typically defines version decisions and generation parameters. PIBOM needs an explicit, curated decision of:
+
+- which artifacts are considered “public product modules”
+- which modules are stable to advertise to consumers
+- which optional modules are included/excluded
+
+This is product ownership, not policy ownership.
+
+#### Maven usage example
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>eu.algites.product</groupId>
+      <artifactId>product-pibom</artifactId>
+      <version>PRODUCT_VERSION</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
+
+#### Product dependency declaration example
+
+After importing PIBOM, consumers can declare product modules without versions:
+
+```xml
+<dependency>
+  <groupId>eu.algites.product</groupId>
+  <artifactId>product-core</artifactId>
+</dependency>
+```
+
+#### What belongs into PIBOM (guideline)
+
+Include:
+
+- all public modules of the product that are intended for direct consumption
+- versions for these modules (aligned to the product release)
+
+Exclude:
+
+- unrelated ecosystem stacks (Hibernate/JOOQ/etc.) unless they are product modules
+- build plugins, plugin configuration, profiles (that belongs to parent POM)
+- transitive “background alignment” beyond what is needed for the product’s own modules (that belongs to PBBOM/PVBOM depending on intent)
+
+---
+
+###### 3.10.5.2.3 Product Variant BOM (PVBOM)
+
+#### Purpose
+
+The **Product Variant BOM (PVBOM)** defines an **opinionated, compatible platform stack assembling one specific product variant**. It is a “ready-to-use” variant that combines multiple products/frameworks into a coherent set of versions.
+
+Example: Spring Boot style BOM that aligns Spring + Hibernate + Jackson + embedded container + logging stack.
+
+#### Characteristics
+
+- **Curated manually** (product/platform decision).
+- May **import multiple BOMs** (PIBOM/PBBOM/other third-party BOMs) or may materialize constraints directly.
+- Intended for application teams who want a “known-good stack” with minimal version decision overhead.
+
+#### Why PVBOM is not auto-generated from Policy Artifacts
+
+A PVBOM is a policy decision plus a product/platform decision:
+
+- It selects a variant (e.g., Hibernate vs iBatis vs jOOQ)
+- It defines compatibility expectations across ecosystems
+- It becomes a published “platform contract”
+
+This needs explicit ownership and review; automatic generation from a generic policy file is insufficient.
+
+#### Maven usage example
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>eu.algites.platform</groupId>
+      <artifactId>platform-pvbom-hibernate</artifactId>
+      <version>PLATFORM_VERSION</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
+
+#### Variant example
+
+Different variants are different PVBs:
+
+- `platform-pvbom-hibernate`
+- `platform-pvbom-ibatis`
+- reminding that variants are a deliberate contract and must be versioned and communicated.
+
+---
+
+##### 3.10.5.3 Relationship to Parent POMs
+
+###### 3.10.5.3.1 Parent POM role
+
+Parent POMs carry build and project conventions:
+
+- pluginManagement
+- properties (often including versions)
+- profiles and build defaults
+- organization-level metadata
+
+They are applied via Maven’s `<parent>` mechanism (inheritance). Only one parent can be used directly, which is why BOM import exists.
+
+###### 3.10.5.3.2 Why BOM and parent POM can share dependencyManagement
+
+It is common that a parent POM and a BOM contain **similar** `dependencyManagement`. However, the artifacts serve different consumers:
+
+- Parent POM: internal project inheritance (build conventions)
+- BOM: external or flexible consumption (version alignment without inheritance)
+
+Algites allows generating both where appropriate, but the category determines intended usage:
+
+- PBBOM: generated background alignment (BOM import)
+- PIBOM: curated product module catalog
+- PVBOM: curated platform stack
+
+###### 3.10.5.3.3 Importing a parent POM as a BOM
+
+Maven permits importing any POM via `<scope>import</scope>` and will effectively use its `dependencyManagement`. While this may work mechanically, Algites usually treats this as a **non-standard** and **discouraged** practice for published contracts, because it couples version alignment to an artifact whose primary role is build convention.
+
+**Normative recommendation:** publish a BOM (PBBOM/PIBOM/PVBOM) for version alignment use-cases, and keep parent POMs for inheritance.
+
+(Internal exceptions may exist for purely private builds, but should be documented explicitly as such.)
+
+---
+
+##### 3.10.5.4 Generation rules
+
+###### 3.10.5.4.1 Policy Background BOM generation (PBBOM)
+
+- PBBOM artifacts **MUST** be generated from Policy Artifacts.
+- PBBOM generation is deterministic:
+    - inputs: `algites-artifact.properties`
+    - outputs: `*-pbbom.pom` (and optionally metadata)
+- If policy `Y` inherits from policy `X`:
+    - `PBBOM-Y` **MUST import** `PBBOM-X`.
+
+###### 3.10.5.4.2 PIBOM and PVBOM creation
+
+- PIBOM and PVBOM artifacts are **manual/curated** by design.
+- Automation may assist (e.g., scanning published modules), but the final curated list and variant definition is owned by the product/platform maintainers.
+
+---
+
+##### 3.10.5.5 Versioning and compatibility expectations
+
+###### 3.10.5.5.1 Version alignment intent
+
+- BOM version indicates a compatibility set.
+- If a consumer overrides versions (explicit `<version>`), compatibility may be broken.
+- Policy aims to reduce risk, not enforce it at runtime.
+
+###### 3.10.5.5.2 When to bump BOM versions
+
+- PBBOM: whenever background constraints change (including upgrades of background libraries)
+- PIBOM: aligned with product releases and public module changes
+- PVBOM: aligned with platform releases and variant changes
+
+---
+
+##### 3.10.5.6 Usage guidelines (Do / Don’t)
+
+###### 3.10.5.6.1 Do
+
+- Use **PBBOM** when developing framework-independent components that must remain compatible with a target runtime background.
+- Use **PIBOM** when consuming a product/library’s modules without pinning per-module versions.
+- Use **PVBOM** when you want a complete, opinionated platform stack with minimal version decisions.
+
+###### 3.10.5.6.2 Don’t
+
+- Don’t treat PIBOM as a platform stack BOM (keep it product-scoped).
+- Don’t overload PBBOM with product module catalogs.
+- Don’t rely on transitive test dependencies; if shared tests are needed, publish explicit `*-tests` artifacts.
+
+---
+
+##### 3.10.5.7 Practical notes for Gradle-only builds with Maven consumers
+
+###### 3.10.5.7.1 Publishing to Maven repositories
+
+When building with Gradle as the single authoritative build tool:
+
+- Gradle publishes standard Maven artifacts:
+    - `jar` (where applicable)
+    - `pom` with correct dependency scopes
+- Maven consumers can use the published artifacts normally.
+- Test dependencies are not part of published POM contracts (by ecosystem design). Shared tests must be modeled explicitly via dedicated `*-tests` artifacts if needed.
+
+###### 3.10.5.7.2 Policy artifacts vs production artifacts
+
+- Policy artifacts produce/host PBBOM outputs and policy parents.
+- Production artifacts consume the selected policy via BOM import (PBBOM/PVBOM) and/or parent inheritance (internal conventions).
+- Keep policy and production concerns separated to minimize coupling and to make compatibility management explicit.
+
+---
+
+##### 3.10.5.8 Appendix: Naming suggestions (non-normative)
+
+This appendix proposes consistent naming patterns; projects may adjust to existing Algites naming standards.
+
+- Policy Background BOM:
+    - `algites-<policy>-pbbom`
+- Product Interface BOM:
+    - `algites-<product>-pibom`
+- Platform Variant BOM:
+    - `algites-<platform>-pvbom-<variant>`
+
+Examples:
+
+- `algites-core-pbbom`
+- `algites-spring-pibom`
+- `algites-platform-pvbom-hibernate`
 
 ---
 
@@ -856,5 +1386,17 @@ flowchart LR
   G --> H[Generate build-tool outputs<br/>(Gradle/Maven mapping)]
 ```
 
-[[/FINAL-APPROVED]]
+### 3.12. Migration Notes (temporary; will be removed)
+
+This section is intentionally placed at the end and is **temporary**.
+
+- Previous models that relied on **ArtifactKind** (policy/bom/aggregator/etc.) should be migrated by:
+    - replacing “kind-driven behavior” with explicit **ContainerVersionContext** + **DependencyIntent** activation,
+    - moving BOM/policy logic into **OutputType** + intent rule templates for dependency steering.
+- Aggregator artifacts remain possible, but are no longer mandatory just to express policy inheritance:
+    - repo-root and containers can supply catalogs,
+    - parent edges define baseline dependency intents.
+
+
+[[/FINALLY-APPROVED]]
 
