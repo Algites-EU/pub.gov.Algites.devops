@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Algites-EU/pub.gov.Algites/schemas/json/devops/build/1.0.0/source-repository.schema.json",
+  "title": "Algites Source Repository Definition",
+  "allOf": [
+    {
+      "$ref": "artifact-container.schema.json"
+    }
+  ],
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "sourceRepository": {
+      "allOf": [
+        {
+          "$ref": "artifact-container.schema.json#/$defs/containerHeader"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repositoryId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "repositoryId"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "sourceRepository"
+  ]
+}

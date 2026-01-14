@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Algites-EU/pub.gov.Algites/schemas/json/devops/build/1.0.0/artifact.schema.json",
+  "title": "Algites Artifact Definition",
+  "allOf": [
+    {
+      "$ref": "artifact-container.schema.json"
+    }
+  ],
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "artifact": {
+      "allOf": [
+        {
+          "$ref": "artifact-container.schema.json#/$defs/containerHeader"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "groupId": {
+              "type": "string"
+            },
+            "artifactId": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "groupId": {
+                  "type": "string"
+                },
+                "artifactId": {
+                  "type": "string"
+                },
+                "outputType": {
+                  "$ref": "artifact-container.schema.json#/$defs/outputTypeUid"
+                }
+              },
+              "required": [
+                "groupId",
+                "artifactId",
+                "outputType"
+              ]
+            },
+            "properties": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "templates": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "defs": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "outputType": {
+                    "$ref": "artifact-container.schema.json#/$defs/outputTypeUid"
+                  }
+                },
+                "required": [
+                  "outputType"
+                ]
+              }
+            },
+            "dependencies": {
+              "type": "array",
+              "items": {
+                "$ref": "artifact-container.schema.json#/$defs/dependency"
+              }
+            }
+          },
+          "required": [
+            "groupId",
+            "artifactId"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "artifact"
+  ]
+}
