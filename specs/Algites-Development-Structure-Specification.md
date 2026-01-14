@@ -742,6 +742,77 @@ Custom outputs:
 
 ---
 
+# 3.7.8 Export Intent Normalization and Transitive Stability
+
+This section defines **default normalization** and **validation rules** for the `exportUse` behavior flags, with the goal of ensuring **stable transitive dependency semantics** and preventing accidental **version divergence** across the dependency graph.
+
+## Motivation
+
+In mainstream build tools (Maven/Gradle), publishing a dependency as part of a module’s API or runtime surface typically implies that its **transitive graph participates** in consumer resolution. In the Algites model this is expressed via `exportUse.intent` (dependency steering/participation in exported intent).
+
+If a dependency were exported to consumers at `compile` or `runtime` **without** exporting its intent, downstream modules could silently re-introduce the same artifact with a different version, increasing the chance of conflicting or non-deterministic outcomes.
+
+Therefore, Algites defines a safe default:
+
+- **If a module exports a dependency for consumer compile/runtime, the dependency’s intent is exported as well**, unless the build policy explicitly permits otherwise (advanced/escape hatch).
+
+## Normative Rules
+
+### R1. Implicit intent export when exporting compile/runtime
+
+For any resolved dependency application where:
+
+- `exportUse.compile == true` **or** `exportUse.runtime == true`
+
+then the effective value must satisfy:
+
+- `exportUse.intent == true`
+
+unless an explicit override is permitted by the active Build Policy (see R3).
+
+> In other words: **compile/runtime export implies intent export** by default.
+
+### R2. Steering-only export remains valid
+
+A dependency may be exported as intent only:
+
+- `exportUse.intent == true`
+- `exportUse.compile == false`
+- `exportUse.runtime == false`
+
+This represents **dependency steering without classpath exposure** (e.g., generating/merging constraint outputs or variant BOMs without forcing the dependency onto consumer classpaths).
+
+### R3. Explicit intent disablement is restricted
+
+For `usage = classpathItem` (the default classpath channel), the following combination is **invalid** by default:
+
+- (`exportUse.compile == true` or `exportUse.runtime == true`) **and** `exportUse.intent == false`
+
+Rationale: it enables untracked re-introduction of the same artifact with a different version downstream, reducing determinism.
+
+A Build Policy may optionally allow this combination as an advanced escape hatch; if allowed, it should additionally require one or more of:
+
+- **explicit locking** of the application (to prevent downstream overrides),
+- **explicit conflict strategy** (deterministic choice rules),
+- or **explicit version constraints** at the same or higher weight layer.
+
+### R4. Behavior composition does not require explicit intent in data
+
+Because the model supports inheritance (unspecified values are inherited, otherwise default to `false`), the default intent implication in R1 may be applied during **normalization**:
+
+- If `exportUse.intent` is unspecified after merging layers, it is treated as `false` initially.
+- Then R1 is applied to produce an **effective** `exportUse.intent` value.
+
+This keeps authoring concise while preserving deterministic behavior.
+
+## Guidance
+
+- Prefer **R1 defaults** for all classpath-exposed exports (compile/runtime).
+- Use **R2 steering-only** exports for “variant/BOM-style” guidance where the dependency should not automatically appear on consumer classpaths.
+- Only consider violating R3 under an explicit Build Policy designed to preserve determinism.
+
+---
+
 ### 3.8. Mapping to Build Tools
 
 #### 3.8.1 Gradle mapping
