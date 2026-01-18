@@ -123,9 +123,16 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+		"versionContextId": {
+		  "type": "string"
+		},
         "releaseLine": {
           "type": "string"
         },
+		"revisionStringSize": {
+		  "type": "integer",
+		  "minimum": 1
+		},
         "revision": {
           "type": "integer",
           "minimum": 0
