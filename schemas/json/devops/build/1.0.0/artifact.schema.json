@@ -8,7 +8,7 @@
     }
   ],
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "artifact": {
       "allOf": [
@@ -17,7 +17,6 @@
         },
         {
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "groupId": {
               "type": "string"
@@ -44,22 +43,6 @@
                 "artifactId",
                 "outputType"
               ]
-            },
-            "properties": {
-              "type": "object",
-              "additionalProperties": true,
-              "properties": {
-                "includedTemplateIds": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "defs": {
-                  "type": "array",
-                  "items": {}
-                }
-              }
             },
             "outputs": {
               "type": "array",
@@ -88,7 +71,8 @@
             "artifactId"
           ]
         }
-      ]
+      ],
+	  "unevaluatedProperties": false
     }
   },
   "required": [

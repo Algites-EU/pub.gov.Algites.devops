@@ -8,7 +8,7 @@
     }
   ],
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "sourceRepository": {
       "allOf": [
@@ -27,7 +27,8 @@
             "repositoryId"
           ]
         }
-      ]
+      ],
+	  "unevaluatedProperties": false
     }
   },
   "required": [

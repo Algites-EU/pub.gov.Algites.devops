@@ -8,10 +8,10 @@
 		"versionContext": {
 			"$ref": "#/$defs/versionContext"
 		},
-		"propertiesTemplates": {
+		"projectPropertiesTemplates": {
 			"type": "array",
 			"items": {
-				"$ref": "#/$defs/propertiesTemplate"
+				"$ref": "#/$defs/projectPropertiesTemplate"
 			}
 		},
 		"dependencyScopeRuleTemplates": {
@@ -25,9 +25,6 @@
 			"items": {
 				"$ref": "#/$defs/dependenciesTemplate"
 			}
-		},
-		"properties": {
-			"type": "object"
 		}
 	},
 	"$defs": {
@@ -69,12 +66,13 @@
 				},
 				{
 					"title": "Custom output type UID",
+					"type" : "string",
 					"description": "Custom outputs use a non-empty namespace.",
 					"pattern": "^custom:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]*:[A-Za-z0-9_.-]+$",
 					"examples": [
 						"custom:eu.algites:myclassifier:zip",
 						"custom:eu.algites::zip",
-						"custom:eu.algites:tests:jar"
+						"custom:eu.algites:customtests:jar"
 					]
 				}
 			],
@@ -171,7 +169,7 @@
 						{
 							"const": "POST_RELEASE",
 							"title": "POST_RELEASE"
-						},
+						}
 					]
 				},
 				"label": {
@@ -220,7 +218,7 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"template": {
+				"templateId": {
 					"type": "string"
 				},
 				"usage": {
@@ -238,7 +236,7 @@
 					]
 				},
 				"behavior": {
-					"$ref": "artifact-container.schema.json#/$defs/behavior"
+					"$ref": "#/$defs/behavior"
 				},
 				"locked": {
 					"type": "boolean"
@@ -259,10 +257,10 @@
 					"type": "string"
 				},
 				"outputType": {
-					"$ref": "artifact-container.schema.json#/$defs/outputTypeUid"
+					"$ref": "#/$defs/outputTypeUid"
 				},
 				"version": {
-					"$ref": "artifact-container.schema.json#/$defs/versionRule"
+					"$ref": "#/$defs/versionRule"
 				}
 			},
 			"required": [
@@ -280,39 +278,38 @@
 				},
 				"artifactId": {
 					"type": "string"
-				},
+				}
 			},
 			"required": [
 				"groupId",
-				"artifactId",
-				"outputType"
+				"artifactId"
 			]
 		},
 		"dependency": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"template": {
+				"templateId": {
 					"type": "string"
 				},
 				"artifact": {
-					"$ref": "artifact-container.schema.json#/$defs/dependencyArtifactRef"
+					"$ref": "#/$defs/dependencyArtifactRef"
 				},
 				"scopeRules": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/scopeRule"
+						"$ref": "#/$defs/scopeRule"
 					}
 				},
 				"exclusions": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/dependencyArtifactCoordinate"
+						"$ref": "#/$defs/dependencyArtifactCoordinate"
 					}
 				}
 			}
 		},
-		"propertiesTemplate": {
+		"projectPropertiesTemplate": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
@@ -325,13 +322,18 @@
 						"type": "string"
 					}
 				},
-				"defs": {
+				"propertyDefinitions": {
 					"type": "array",
-					"items": {}
+					"items": {
+						"type": "object",
+						"minProperties": 1,
+						"maxProperties": 1,
+						"additionalProperties": { "$ref": "#/$defs/projectPropertyValue" }
+					}
 				}
 			},
 			"required": [
-				"template"
+				"templateId"
 			]
 		},
 		"dependencyScopeRuleTemplates": {
@@ -350,7 +352,7 @@
 				"scopeRules": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/scopeRule"
+						"$ref": "#/$defs/scopeRule"
 					}
 				}
 			},
@@ -375,7 +377,7 @@
 				"dependencies": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/dependency"
+						"$ref": "#/$defs/dependency"
 					}
 				}
 			},
@@ -384,15 +386,51 @@
 				"dependencies"
 			]
 		},
+		"projectPropertyValue": {
+			"oneOf": [
+				{ "type": "null" },
+				{ "type": "boolean" },
+				{ "type": "number" },
+				{ "type": "string" },
+				{
+					"type": "array",
+					"items": { "$ref": "#/$defs/projectPropertyValue" }
+				},
+				{
+					"type": "object",
+					"additionalProperties": { "$ref": "#/$defs/projectPropertyValue" }
+				}
+			]
+		},
 		"containerHeader": {
 			"type": "object",
-			"additionalProperties": false,
 			"properties": {
 				"name": {
 					"type": "string"
 				},
 				"description": {
 					"type": "string"
+				},
+				"projectProperties": {
+					"type": "object",
+					"additionalProperties": { "$ref": "#/$defs/projectPropertyValue" },
+					"properties": {
+						"includedTemplateIds": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"propertyDefinitions": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"minProperties": 1,
+								"maxProperties": 1,
+								"additionalProperties": { "$ref": "#/$defs/projectPropertyValue" }
+							}
+						}
+					}
 				},
 				"containedArtifactRelativePaths": {
 					"type": "array",
