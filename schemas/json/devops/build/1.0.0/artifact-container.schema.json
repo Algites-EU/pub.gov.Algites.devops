@@ -1,333 +1,371 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/Algites-EU/pub.gov.Algites/schemas/json/devops/build/1.0.0/artifact-container.schema.json",
-  "title": "Algites Artifact Container (shared)",
-  "type": "object",
-  "additionalProperties": true,
-  "properties": {
-    "versionContext": {
-      "$ref": "#/$defs/versionContext"
-    },
-    "propertiesTemplates": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/propertiesTemplate"
-      }
-    },
-    "dependencyApplyTemplates": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/dependencyApplyTemplate"
-      }
-    },
-    "dependenciesTemplates": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/dependenciesTemplate"
-      }
-    },
-    "properties": {
-      "type": "object"
-    }
-  },
-  "$defs": {
-    "outputTypeUid": {
-      "type": "string",
-      "description": "OutputType UID formatted as <kindClass>:<namespace>:<classifier>:<fileType>. For builtin outputs, namespace must be empty.",
-      "oneOf": [
-        {
-          "const": "builtin:::jar",
-          "title": "MAIN_JAVA_CLASSES_JAR"
-        },
-        {
-          "const": "builtin:::pom",
-          "title": "MAIN_MAVEN_POM"
-        },
-        {
-          "const": "builtin::sources:jar",
-          "title": "MAIN_JAVA_SOURCE_JAR"
-        },
-        {
-          "const": "builtin::javadoc:jar",
-          "title": "MAIN_JAVA_DOC_JAR"
-        },
-        {
-          "const": "builtin::tests:jar",
-          "title": "TEST_JAVA_CLASSES_JAR"
-        },
-        {
-          "const": "builtin::test-sources:jar",
-          "title": "TEST_JAVA_SOURCE_JAR"
-        },
-        {
-          "const": "builtin::test-javadoc:jar",
-          "title": "TEST_JAVA_DOC_JAR"
-        },
-        {
-          "const": "builtin::pbbom:pom",
-          "title": "POLICY_BACKGROUND_BOM"
-        },
-        {
-          "title": "Custom output type UID",
-          "description": "Custom outputs use a non-empty namespace.",
-          "pattern": "^custom:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]*:[A-Za-z0-9_.-]+$",
-          "examples": [
-            "custom:eu.algites:myclassifier:zip",
-            "custom:eu.algites::zip",
-            "custom:eu.algites:tests:jar"
-          ]
-        }
-      ],
-      "default": "builtin:::jar",
-      "examples": [
-        "builtin:::jar",
-        "builtin:::pom",
-        "builtin::sources:jar",
-        "builtin::javadoc:jar",
-        "builtin::tests:jar",
-        "builtin::test-sources:jar",
-        "builtin::test-javadoc:jar",
-        "builtin::pbbom:pom",
-        "custom:eu.algites:myclassifier:zip"
-      ]
-    },
-    "versionRule": {
-      "description": "Uncontrolled version rule. Prefer quoted strings for versions and ranges.",
-      "oneOf": [
-        {
-          "type": "string",
-          "description": "Fixed version string (mapped to preferred in toolchain logic)."
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "preferred": {
-              "type": "string"
-            },
-            "range": {
-              "type": "string",
-              "description": "Single range expression, e.g. \"[1.0,2.0)\"."
-            },
-            "ranges": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      ]
-    },
-    "versionContext": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-		"versionContextId": {
-		  "type": "string"
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://raw.githubusercontent.com/Algites-EU/pub.gov.Algites/schemas/json/devops/build/1.0.0/artifact-container.schema.json",
+	"title": "Algites Artifact Container (shared)",
+	"type": "object",
+	"additionalProperties": true,
+	"properties": {
+		"versionContext": {
+			"$ref": "#/$defs/versionContext"
 		},
-        "releaseLine": {
-          "type": "string"
-        },
-		"revisionStringSize": {
-		  "type": "integer",
-		  "minimum": 1
+		"propertiesTemplates": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/propertiesTemplate"
+			}
 		},
-        "revision": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "qualifierKind": {
-          "type": "string"
-        },
-        "qualifierLabel": {
-          "type": "string"
-        }
-      }
-    },
-    "behavior": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "importUse": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "compile": {
-              "type": "boolean"
-            },
-            "runtime": {
-              "type": "boolean"
-            }
-          }
-        },
-        "exportUse": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "compile": {
-              "type": "boolean"
-            },
-            "runtime": {
-              "type": "boolean"
-            },
-            "manage": {
-              "type": "boolean"
-            }
-          }
-        }
-      }
-    },
-    "apply": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "template": {
-          "type": "string"
-        },
-        "usage": {
-          "type": "string",
-          "enum": [
-            "classpathItem",
-            "sourceProcessor"
-          ]
-        },
-        "sourceSet": {
-          "type": "string",
-          "enum": [
-            "main",
-            "test"
-          ]
-        },
-        "behavior": {
-          "$ref": "artifact-container.schema.json#/$defs/behavior"
-        },
-        "locked": {
-          "type": "boolean"
-        },
-        "weight": {
-          "type": "integer"
-        }
-      }
-    },
-    "dependencyArtifactRef": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "groupId": {
-          "type": "string"
-        },
-        "artifactId": {
-          "type": "string"
-        },
-        "outputType": {
-          "$ref": "artifact-container.schema.json#/$defs/outputTypeUid"
-        },
-        "version": {
-          "$ref": "artifact-container.schema.json#/$defs/versionRule"
-        }
-      },
-      "required": [
-        "groupId",
-        "artifactId",
-        "outputType"
-      ]
-    },
-    "dependency": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "template": {
-          "type": "string"
-        },
-        "artifact": {
-          "$ref": "artifact-container.schema.json#/$defs/dependencyArtifactRef"
-        },
-        "apply": {
-          "type": "array",
-          "items": {
-            "$ref": "artifact-container.schema.json#/$defs/apply"
-          }
-        }
-      }
-    },
-    "propertiesTemplate": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "template": {
-          "type": "string"
-        },
-        "templates": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "defs": {
-          "type": "array",
-          "items": {}
-        }
-      },
-      "required": [
-        "template"
-      ]
-    },
-    "dependencyApplyTemplate": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "template": {
-          "type": "string"
-        },
-        "apply": {
-          "type": "array",
-          "items": {
-            "$ref": "artifact-container.schema.json#/$defs/apply"
-          }
-        }
-      },
-      "required": [
-        "template",
-        "apply"
-      ]
-    },
-    "dependenciesTemplate": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "template": {
-          "type": "string"
-        },
-        "dependencies": {
-          "type": "array",
-          "items": {
-            "$ref": "artifact-container.schema.json#/$defs/dependency"
-          }
-        }
-      },
-      "required": [
-        "template",
-        "dependencies"
-      ]
-    },
-    "containerHeader": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "containedArtifactRelativePaths": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  }
+		"dependencyApplyTemplates": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/dependencyScopeRuleTemplates"
+			}
+		},
+		"dependenciesTemplates": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/dependenciesTemplate"
+			}
+		},
+		"properties": {
+			"type": "object"
+		}
+	},
+	"$defs": {
+		"outputTypeUid": {
+			"type": "string",
+			"description": "OutputType UID formatted as <kindClass>:<namespace>:<classifier>:<fileType>. For builtin outputs, namespace must be empty.",
+			"oneOf": [
+				{
+					"const": "builtin:::jar",
+					"title": "MAIN_JAVA_CLASSES_JAR"
+				},
+				{
+					"const": "builtin:::pom",
+					"title": "MAIN_MAVEN_POM"
+				},
+				{
+					"const": "builtin::sources:jar",
+					"title": "MAIN_JAVA_SOURCE_JAR"
+				},
+				{
+					"const": "builtin::javadoc:jar",
+					"title": "MAIN_JAVA_DOC_JAR"
+				},
+				{
+					"const": "builtin::tests:jar",
+					"title": "TEST_JAVA_CLASSES_JAR"
+				},
+				{
+					"const": "builtin::test-sources:jar",
+					"title": "TEST_JAVA_SOURCE_JAR"
+				},
+				{
+					"const": "builtin::test-javadoc:jar",
+					"title": "TEST_JAVA_DOC_JAR"
+				},
+				{
+					"const": "builtin::pbbom:pom",
+					"title": "POLICY_BACKGROUND_BOM"
+				},
+				{
+					"title": "Custom output type UID",
+					"description": "Custom outputs use a non-empty namespace.",
+					"pattern": "^custom:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]*:[A-Za-z0-9_.-]+$",
+					"examples": [
+						"custom:eu.algites:myclassifier:zip",
+						"custom:eu.algites::zip",
+						"custom:eu.algites:tests:jar"
+					]
+				}
+			],
+			"default": "builtin:::jar",
+			"examples": [
+				"builtin:::jar",
+				"builtin:::pom",
+				"builtin::sources:jar",
+				"builtin::javadoc:jar",
+				"builtin::tests:jar",
+				"builtin::test-sources:jar",
+				"builtin::test-javadoc:jar",
+				"builtin::pbbom:pom",
+				"custom:eu.algites:myclassifier:zip"
+			]
+		},
+		"versionRule": {
+			"description": "Uncontrolled version rule. Prefer quoted strings for versions and ranges.",
+			"oneOf": [
+				{
+					"type": "string",
+					"description": "Fixed version string (mapped to preferred in toolchain logic)."
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"preferred": {
+							"type": "string"
+						},
+						"range": {
+							"type": "string",
+							"description": "Single range expression, e.g. \"[1.0,2.0)\"."
+						},
+						"ranges": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			]
+		},
+		"versionContext": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"versionContextId": {
+					"type": "string",
+					"description": "Unique identification of the version cntext within the repository. It MUST be time-stable and specific version number independent"
+				},
+				"releaseLine": {
+					"type": "string"
+				},
+				"revisionStringSize": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Size of the revision string in the final generated version string. What is not defined before the version number will be filled by '0' characters. So if this value is 3, then the revision will appear in version string like '001' or '025' etc."
+				},
+				"revision": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"qualifier": {
+					"$ref": "#/$defs/versionQualifier"
+				}
+			},
+			"required": [
+				"versionContextId",
+				"releaseLine",
+				"revision"
+			]
+		},
+		"versionQualifier": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"kind": {
+					"type": "string",
+					"oneOf": [
+						{
+							"const": "SNAPSHOT",
+							"title": "SNAPSHOT"
+						},
+						{
+							"const": "PRE_RELEASE",
+							"title": "PRE_RELEASE"
+						},
+						{
+							"const": "RELEASE",
+							"title": "RELEASE"
+						},
+						{
+							"const": "POST_RELEASE",
+							"title": "POST_RELEASE"
+						},
+					]
+				},
+				"label": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"kind",
+				"label"
+			]
+		},
+		"behavior": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"importUse": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"compile": {
+							"type": "boolean"
+						},
+						"runtime": {
+							"type": "boolean"
+						}
+					}
+				},
+				"exportUse": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"compile": {
+							"type": "boolean"
+						},
+						"runtime": {
+							"type": "boolean"
+						},
+						"manage": {
+							"type": "boolean"
+						}
+					}
+				}
+			}
+		},
+		"apply": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"template": {
+					"type": "string"
+				},
+				"usage": {
+					"type": "string",
+					"enum": [
+						"classpathItem",
+						"sourceProcessor"
+					]
+				},
+				"sourceSet": {
+					"type": "string",
+					"enum": [
+						"main",
+						"test"
+					]
+				},
+				"behavior": {
+					"$ref": "artifact-container.schema.json#/$defs/behavior"
+				},
+				"locked": {
+					"type": "boolean"
+				},
+				"weight": {
+					"type": "integer"
+				}
+			}
+		},
+		"dependencyArtifactRef": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"groupId": {
+					"type": "string"
+				},
+				"artifactId": {
+					"type": "string"
+				},
+				"outputType": {
+					"$ref": "artifact-container.schema.json#/$defs/outputTypeUid"
+				},
+				"version": {
+					"$ref": "artifact-container.schema.json#/$defs/versionRule"
+				}
+			},
+			"required": [
+				"groupId",
+				"artifactId",
+				"outputType"
+			]
+		},
+		"dependency": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"template": {
+					"type": "string"
+				},
+				"artifact": {
+					"$ref": "artifact-container.schema.json#/$defs/dependencyArtifactRef"
+				},
+				"apply": {
+					"type": "array",
+					"items": {
+						"$ref": "artifact-container.schema.json#/$defs/apply"
+					}
+				}
+			}
+		},
+		"propertiesTemplate": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"templateId": {
+					"type": "string"
+				},
+				"templates": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"defs": {
+					"type": "array",
+					"items": {}
+				}
+			},
+			"required": [
+				"template"
+			]
+		},
+		"dependencyScopeRuleTemplates": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"templateId": {
+					"type": "string"
+				},
+				"scopeRules": {
+					"type": "array",
+					"items": {
+						"$ref": "artifact-container.schema.json#/$defs/apply"
+					}
+				}
+			},
+			"required": [
+				"templateId",
+				"scopeRules"
+			]
+		},
+		"dependenciesTemplate": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"templateId": {
+					"type": "string"
+				},
+				"dependencies": {
+					"type": "array",
+					"items": {
+						"$ref": "artifact-container.schema.json#/$defs/dependency"
+					}
+				}
+			},
+			"required": [
+				"templateId",
+				"dependencies"
+			]
+		},
+		"containerHeader": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"type": "string"
+				},
+				"description": {
+					"type": "string"
+				},
+				"containedArtifactRelativePaths": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
 }
