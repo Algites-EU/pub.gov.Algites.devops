@@ -218,21 +218,22 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"templateId": {
+				"templateUid": {
 					"type": "string"
 				},
 				"usage": {
 					"type": "string",
 					"enum": [
-						"classpathItem",
-						"sourceProcessor"
+						"builtin::classpathItem",
+						"builtin::sourceProcessor"
 					]
 				},
 				"sourceSet": {
 					"type": "string",
 					"enum": [
-						"main",
-						"test"
+						"builtin::mainOnly",
+						"builtin::testOnly",
+						"builtin::mainAndTest"
 					]
 				},
 				"behavior": {
@@ -289,7 +290,7 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"templateId": {
+				"templateUid": {
 					"type": "string"
 				},
 				"artifact": {
@@ -313,10 +314,10 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"templateId": {
+				"templateUid": {
 					"type": "string"
 				},
-				"includedTemplateIds": {
+				"includedTemplateUids": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -333,17 +334,17 @@
 				}
 			},
 			"required": [
-				"templateId"
+				"templateUid"
 			]
 		},
 		"dependencyScopeRuleTemplates": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"templateId": {
+				"templateUid": {
 					"type": "string"
 				},
-				"includedTemplateIds": {
+				"includedTemplateUids": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -357,7 +358,7 @@
 				}
 			},
 			"required": [
-				"templateId",
+				"templateUid",
 				"scopeRules"
 			]
 		},
@@ -365,10 +366,10 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"templateId": {
+				"templateUid": {
 					"type": "string"
 				},
-				"includedTemplateIds": {
+				"includedTemplateUids": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -382,7 +383,7 @@
 				}
 			},
 			"required": [
-				"templateId",
+				"templateUid",
 				"dependencies"
 			]
 		},
@@ -415,7 +416,7 @@
 					"type": "object",
 					"additionalProperties": { "$ref": "#/$defs/projectPropertyValue" },
 					"properties": {
-						"includedTemplateIds": {
+						"includedTemplateUids": {
 							"type": "array",
 							"items": {
 								"type": "string"
