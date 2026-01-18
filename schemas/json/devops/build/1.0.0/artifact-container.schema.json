@@ -14,7 +14,7 @@
 				"$ref": "#/$defs/propertiesTemplate"
 			}
 		},
-		"dependencyApplyTemplates": {
+		"dependencyScopeRuleTemplates": {
 			"type": "array",
 			"items": {
 				"$ref": "#/$defs/dependencyScopeRuleTemplates"
@@ -216,7 +216,7 @@
 				}
 			}
 		},
-		"apply": {
+		"scopeRule": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
@@ -271,6 +271,23 @@
 				"outputType"
 			]
 		},
+		"dependencyArtifactCoordinate": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"groupId": {
+					"type": "string"
+				},
+				"artifactId": {
+					"type": "string"
+				},
+			},
+			"required": [
+				"groupId",
+				"artifactId",
+				"outputType"
+			]
+		},
 		"dependency": {
 			"type": "object",
 			"additionalProperties": false,
@@ -281,10 +298,16 @@
 				"artifact": {
 					"$ref": "artifact-container.schema.json#/$defs/dependencyArtifactRef"
 				},
-				"apply": {
+				"scopeRules": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/apply"
+						"$ref": "artifact-container.schema.json#/$defs/scopeRule"
+					}
+				},
+				"exclusions": {
+					"type": "array",
+					"items": {
+						"$ref": "artifact-container.schema.json#/$defs/dependencyArtifactCoordinate"
 					}
 				}
 			}
@@ -296,7 +319,7 @@
 				"templateId": {
 					"type": "string"
 				},
-				"templates": {
+				"includedTemplateIds": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -318,10 +341,16 @@
 				"templateId": {
 					"type": "string"
 				},
+				"includedTemplateIds": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
 				"scopeRules": {
 					"type": "array",
 					"items": {
-						"$ref": "artifact-container.schema.json#/$defs/apply"
+						"$ref": "artifact-container.schema.json#/$defs/scopeRule"
 					}
 				}
 			},
@@ -336,6 +365,12 @@
 			"properties": {
 				"templateId": {
 					"type": "string"
+				},
+				"includedTemplateIds": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				},
 				"dependencies": {
 					"type": "array",
